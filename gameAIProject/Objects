@@ -1,9 +1,17 @@
 from random import randint
+import numpy as np
 
 # The global parameters of the screen
 
 MAX_ROW = 0
 MAX_COL = 0
+
+def distance_to(startPos, endPos):
+
+    direction = endPos - startPos
+    distance = np.linalg.norm(direction)
+    return distance
+
 
 ########################################################################
 #   The file of code defines the objects that would appeared in game.  #
@@ -24,12 +32,6 @@ class Objects:
         self.owner = owner
         self.position = position
         self.screen = screen
-
-
-class Weapons(Objects):
-
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
 
 
 class Armors(Objects):
@@ -138,10 +140,120 @@ class ScrollsOfResurrection(Scrolls):
 ########################################################################
 
 
-class Portions(Objects):
+# __str__ creates string representation for each scrolls
+# use() make effects to the owner of the scrolls.
+
+class Potions(Objects):
 
     def __init__(self, screen, owner=None, position=None):
         Objects.__init__(screen, owner, position)
+
+    def display(self):
+
+        # display the scrolls if it is in screen
+        return
+
+
+class HitPointPotion(Potions):
+
+    def __str__(self):
+        return "HP Potion"
+
+    def use(self):
+
+        self.owner.HP += self.owner.MAX_HP * 0.4
+        if self.owner.HP > self.owner.MAX_HP:
+            self.owner.HP = self.owner.MAX_HP
+
+
+class HitPointSuperPotion(Potions):
+
+    def __str__(self):
+        return "HP Super Potion"
+
+    def use(self):
+
+        self.owner.HP = self.owner.MAX_HP
+
+
+class MagicPointPotion(Potions):
+
+    def __str__(self):
+        return "MP Potion"
+
+    def use(self):
+
+        self.owner.MP += self.owner.MAX_MP * 0.4
+        if self.owner.MP > self.owner.MAX_MP:
+            self.owner.MP = self.owner.MAX_MP
+
+
+class MagicPointSuperPotion(Potions):
+
+    def __str__(self):
+        return "MP Super Potion"
+
+    def use(self):
+        self.owner.MP = self.owner.MAX_MP
+
+
+class Elixir(Potions):
+
+    def __str__(self):
+        return "Elixir"
+
+    def use(self):
+
+        self.owner.MP = self.owner.MAX_MP
+        self.owner.HP = self.owner.MAX_HP
+
+
+########################################################################
+#   The block defines the Weapons in the game                          #
+########################################################################
+
+
+class Weapons(Objects):
+
+    STR = 0
+    DEF = 0
+    INT = 0
+    DEX = 0
+    durability = 0
+    MAX_ATK_distance = 0
+
+    def __init__(self, screen, owner=None, position=None):
+        Objects.__init__(screen, owner, position)
+
+
+class MeleeWeapons(Weapons):
+
+    def attack(self, target):
+
+        if distance_to(self.owner.position, target.position) <= self.MAX_ATK_distance:
+            # do the attack
+            return
+
+
+class SorceriesWeapons(Weapons):
+
+    def attack(self, target):
+
+        if distance_to(self.owner.position, target.position) <= self.MAX_ATK_distance:
+            # generate a bullet
+            return
+
+
+class AlchemyBomb(Weapons):
+
+    def attack(self):
+        # Generate a bomb on the ground.
+        return
+
+
+
+
+
 
 
 
