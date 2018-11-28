@@ -17,15 +17,22 @@ class Maze:
     monster_list = []
     room_list = []
     maze = []
-    size = [1000, 800]
-    MAX_COL = 50
+    size = [1300, 800]
+    MAX_COL = 65
     MAX_ROW = 40
     step = 20
+    stair_up = None
+    stair_down = None
 
     def __init__(self, screen, levels):
         self.screen = screen
         self.levels = levels
         self.init_maze()
+        self.add_objects()
+        self.add_monsters()
+
+    def __str__(self):
+        return "The %d level of maze" % self.levels
 
     def init_maze(self):
 
@@ -53,8 +60,8 @@ class Maze:
 
                 top_left_row = randint(1, self.MAX_ROW)
                 top_left_col = randint(1, self.MAX_COL)
-                width = randint(8, 25)
-                height = randint(8, 25)
+                width = randint(16, 30)
+                height = randint(8, 20)
 
                 for a in range(top_left_row - 1, min(self.MAX_ROW, (top_left_row + height + 1))):
                     for b in range(top_left_col - 1, min(self.MAX_COL, (top_left_col + width + 1))):
@@ -79,12 +86,47 @@ class Maze:
         for i in range(len(self.room_list) - 1):
             self.generate_path(self.room_list[i], self.room_list[i+1])
 
+        # add stairs to the map.
+
+    # add objects to the map
+
+    def add_objects(self):
+        return
+
+    # add monsters to the map.
+
+    def add_monsters(self):
+        return
+
+    # given a row number and col number, return if it is a wall.
+
+    def is_wall(self, row, col):
+
+        if self.maze[row][col] == 1:
+            return True
+        else:
+            return False
+
+    # given a row number and col number, return the object at that position, or None if there is no pbject.
+
+    def object_at(self, row, col):
+
+        for objects in self.object_list:
+            if objects.row == row and objects.col == col:
+                return objects
+
+        return None
+
+    # display the content on the map.
+
     def display(self):
 
         for i in range(self.MAX_ROW):
             for j in range(self.MAX_COL):
                 if self.maze[i][j] == 1:
                     pygame.draw.rect(self.screen, BROWN, [j*self.step, i*self.step, self.step, self.step])
+
+    # generate a path between room
 
     def generate_path(self, room_1, room_2):
 
@@ -93,6 +135,8 @@ class Maze:
         room_2_row = room_2.top_left_rows + randint(2, room_2.height - 2)
         room_2_col = room_2.top_left_cols + randint(2, room_2.width - 2)
         self.connect(room_1_row, room_1_col, room_2_row, room_2_col)
+
+    # helper function to generate path(recursive)
 
     def connect(self, sr, sc, tr, tc):
 

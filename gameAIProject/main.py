@@ -3,7 +3,7 @@ import pygame
 from pygame.locals import *
 from gameAIProject import maze, objects
 
-SIZE = [1000, 800]
+SIZE = [1300, 800]
 
 if __name__ == "__main__":
 
