@@ -157,8 +157,6 @@ class Monster(pygame.sprite.Sprite):
                 self.change_y = -self.change_y
 
 
-
-
 # Call this function so the Pygame library can initialize itself
 pygame.init()
 
@@ -229,8 +227,8 @@ while not done:
     tmpvx = (player.rect.x - monster.rect.x)
     tmpvy = (player.rect.y - monster.rect.y)
     slope = sqrt(tmpvx ** 2 + tmpvy ** 2)
-    tmpvx = tmpvx/slope*maxa
-    tmpvy = tmpvy/slope*maxa
+    tmpvx = tmpvx / slope * maxa
+    tmpvy = tmpvy / slope * maxa
     monster.changespeed(tmpvx, tmpvy)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
