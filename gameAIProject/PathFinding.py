@@ -33,7 +33,6 @@ class PathFinding(object):
                         self.graph[self.tmp[i][j]].append(self.tmp[i + 1][j])
                     if j + 1 < len(self.tmp[i]) and self.tmp[i][j + 1] != 1:
                         self.graph[self.tmp[i][j]].append(self.tmp[i][j + 1])
-        print self.tmp
 
     def setStartEnd(self, maze):
         for i in range(len(maze)):
@@ -46,7 +45,6 @@ class PathFinding(object):
     def countDist(self, x, y):
         '''
         manhattan distance as the estimate function
-        :param coordinate:
         :param x:
         :param y:
         :return:
@@ -58,15 +56,8 @@ class PathFinding(object):
     def nodeToCoordinate(self, x):
         return self.m[x][0], self.m[x][1]
 
-    @staticmethod
-    def coordinateToNode(x, y):
-        '''
-        still wonder how to do this
-        :param x:
-        :param y:
-        :return:
-        '''
-        return None
+    def coordinateToNode(self, row, col):
+        return self.tmp[row][col]
 
     def aStar(self):
         s = self.start
@@ -93,6 +84,9 @@ class PathFinding(object):
                     father[i] = now
                     d[i] = d[now] + 1
                     heapq.heappush(heap, [d[i] + self.countDist(i, t) * 0.3, i])  # A*
+
+        if t not in visited:
+            return []
         i = t
         while i != -1:
             path.insert(0, i)
@@ -107,13 +101,10 @@ class PathFinding(object):
 # maze will be a size of 65*40
 # Testing
 
-g = [[1, 4, 5], [0, 4, 5, 6, 2, 13], [1, 5, 6, 7, 3], [2, 6, 7], [4, 9], [1, 2, 4], [], [3, 2], [4, 5, 9, 12],
-     [5, 8, 13, 10], [15], [], [], [], [], []]
-cood = [[0, 0], [0, 1], [0, 2], [0, 3], [1, 0], [1, 1], [1, 2], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [3, 0], [3, 1],
-        [3, 2], [3, 3]]
-maze = [[2, 0, 0, 1], [1, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 3]]
+maze = [[2, 1, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 3]]
 print maze
 p = PathFinding(maze)
+print p.tmp
 print p.graph
 p.setStartEnd(maze)
 print p.aStar()
