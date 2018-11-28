@@ -55,9 +55,8 @@ class PathFinding(object):
         ty = abs(self.m[x][1] - self.m[y][1])
         return tx + ty
 
-    @staticmethod
-    def nodeToCoordinate(coordinate, x):
-        return coordinate[x][0], coordinate[x][1]
+    def nodeToCoordinate(self, x):
+        return self.m[x][0], self.m[x][1]
 
     @staticmethod
     def coordinateToNode(x, y):
@@ -100,8 +99,8 @@ class PathFinding(object):
             i = father[i]
 
         # change node number to coordinate
-        # for i in range(len(path)):
-        #     path[i] = PathFinding.nodeToCoordinate(coordinate, path[i])
+        for i in range(len(path)):
+            path[i] = self.nodeToCoordinate(path[i])
         return path
 
 
