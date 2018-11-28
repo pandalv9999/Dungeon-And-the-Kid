@@ -6,6 +6,7 @@ import numpy as np
 MAX_ROW = 0
 MAX_COL = 0
 
+
 def distance_to(startPos, endPos):
 
     direction = endPos - startPos
