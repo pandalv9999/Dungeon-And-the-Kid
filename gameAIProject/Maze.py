@@ -44,12 +44,9 @@ class Maze:
                 rows.append(1)
             self.maze.append(rows)
 
-        print(len(self.maze))
-        print(len(self.maze[0]))
-
         # generate random Rooms
 
-        number_rooms = randint(4, 6)
+        number_rooms = randint(7, 10)
 
         for i in range(number_rooms):
 
@@ -60,8 +57,8 @@ class Maze:
 
                 top_left_row = randint(1, self.MAX_ROW)
                 top_left_col = randint(1, self.MAX_COL)
-                width = randint(16, 30)
-                height = randint(8, 20)
+                width = randint(8, 20)
+                height = randint(8, 16)
 
                 for a in range(top_left_row - 1, min(self.MAX_ROW, (top_left_row + height + 1))):
                     for b in range(top_left_col - 1, min(self.MAX_COL, (top_left_col + width + 1))):
@@ -81,10 +78,20 @@ class Maze:
                 for b in range(top_left_col, top_left_col + width):
                     self.maze[a][b] = 0
 
+        # sort the room to make it neat
+
+        self.room_list.sort(key=lambda x: x.top_left_cols)
+
         # generate corridor between rooms
 
         for i in range(len(self.room_list) - 1):
-            self.generate_path(self.room_list[i], self.room_list[i+1])
+            room_1 = self.room_list[i]
+            room_2 = self.room_list[i+1]
+
+            if not room_1.connected or not room_2.connected:
+                self.generate_path(room_1, room_2)
+
+        print(self.maze)
 
         # add stairs to the map.
 
@@ -134,22 +141,36 @@ class Maze:
         room_1_col = room_1.top_left_cols + randint(2, room_1.width - 2)
         room_2_row = room_2.top_left_rows + randint(2, room_2.height - 2)
         room_2_col = room_2.top_left_cols + randint(2, room_2.width - 2)
-        self.connect(room_1_row, room_1_col, room_2_row, room_2_col)
+        self.connect(room_1_row, room_1_col, room_2_row, room_2_col, randint(0, 1))
+        room_1.connected = True
+        room_2.connected = True
 
     # helper function to generate path(recursive)
 
-    def connect(self, sr, sc, tr, tc):
+    def connect(self, sr, sc, tr, tc, pattern):
 
-        if sr > tr:
-            self.connect(sr - 1, sc, tr, tc)
-        elif sr < tr:
-            self.connect(sr + 1, sc, tr, tc)
-        elif sc > tc:
-            self.connect(sr, sc - 1, tr, tc)
-        elif sc < tc:
-            self.connect(sr, sc + 1, tr, tc)
+        if pattern == 1:
+            if sr > tr:
+                self.connect(sr - 1, sc, tr, tc, pattern)
+            elif sr < tr:
+                self.connect(sr + 1, sc, tr, tc, pattern)
+            elif sc > tc:
+                self.connect(sr, sc - 1, tr, tc, pattern)
+            elif sc < tc:
+                self.connect(sr, sc + 1, tr, tc, pattern)
+            else:
+                return
         else:
-            return
+            if sc > tc:
+                self.connect(sr, sc - 1, tr, tc, pattern)
+            elif sc < tc:
+                self.connect(sr, sc + 1, tr, tc, pattern)
+            elif sr > tr:
+                self.connect(sr - 1, sc, tr, tc, pattern)
+            elif sr < tr:
+                self.connect(sr + 1, sc, tr, tc, pattern)
+            else:
+                return
 
         self.maze[sr][sc] = 0
 
@@ -167,6 +188,7 @@ class Room:
     top_left_cols = 0
     width = 0
     height = 0
+    connected = False
 
     def __init__(self, rows, cols, width, height):
         self.width = width
