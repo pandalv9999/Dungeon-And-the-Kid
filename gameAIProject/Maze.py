@@ -1,8 +1,17 @@
 from random import randint
+from gameAIProject import objects
 import pygame
 
 WHITE = (255, 255, 255)
 BROWN = (90, 39, 41)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+
+NULL = 0
+WALL = 1
+POTION = 8
+SCROLLS = 9
+STAIR = 10
 
 ########################################################################
 #   The file of code defines the The maze of the game                  #
@@ -21,8 +30,8 @@ class Maze:
     MAX_COL = 65
     MAX_ROW = 40
     step = 20
-    stair_up = None
-    stair_down = None
+    stair_down_row = 0
+    stair_down_col = 0
 
     def __init__(self, screen, levels):
         self.screen = screen
@@ -41,7 +50,7 @@ class Maze:
         for r in range(self.MAX_ROW):
             rows = []
             for c in range(self.MAX_COL):
-                rows.append(1)
+                rows.append(WALL)
             self.maze.append(rows)
 
         # generate random Rooms
@@ -57,8 +66,8 @@ class Maze:
 
                 top_left_row = randint(1, self.MAX_ROW)
                 top_left_col = randint(1, self.MAX_COL)
-                width = randint(8, 20)
-                height = randint(8, 16)
+                width = randint(8, 15)
+                height = randint(8, 15)
 
                 for a in range(top_left_row - 1, min(self.MAX_ROW, (top_left_row + height + 1))):
                     for b in range(top_left_col - 1, min(self.MAX_COL, (top_left_col + width + 1))):
@@ -91,14 +100,74 @@ class Maze:
             if not room_1.connected or not room_2.connected:
                 self.generate_path(room_1, room_2)
 
-        print(self.maze)
-
         # add stairs to the map.
 
-    # add objects to the map
+        end_room = self.room_list[number_rooms - 1]
+        self.stair_down_row = end_room.top_left_rows + randint(3, end_room.height - 3)
+        self.stair_down_col = end_room.top_left_cols + randint(3, end_room.width - 3)
+        self.maze[self.stair_down_row][self.stair_down_col] = STAIR
+
+    # add objects to the map. Objects are stored in the map as numbers.
 
     def add_objects(self):
-        return
+
+        num_objects = 7 + randint(0, 7)
+
+        for i in range(0, num_objects):
+
+            types = randint(0, 5)
+
+            while True:
+                rows = randint(0, self.MAX_ROW - 1)
+                cols = randint(0, self.MAX_COL - 1)
+                if self.maze[rows][cols] == NULL:
+                    break
+
+            if types == 0 or types == 1 or types == 2:  # potion
+
+                subtypes = randint(0, 31)
+                if subtypes in range(0, 10):
+                    new_object = objects.HitPointPotion(self.screen, rows, cols)
+                elif subtypes in range(10, 20):
+                    new_object = objects.MagicPointPotion(self.screen, rows, cols)
+                elif subtypes in range(20, 25):
+                    new_object = objects.HitPointSuperPotion(self.screen, rows, cols)
+                elif subtypes in range(25, 30):
+                    new_object = objects.MagicPointSuperPotion(self.screen, rows, cols)
+                else:
+                    new_object = objects.Elixir(self.screen, rows, cols)
+
+                self.maze[rows][cols] = POTION
+
+            elif types == 3:    # scrolls
+
+                subtypes = randint(0, 7)
+                if subtypes == 0:
+                    new_object = objects.ScrollsOfDEF(self.screen, rows, cols)
+                elif subtypes == 1:
+                    new_object = objects.ScrollsOfDEX(self.screen, rows, cols)
+                elif subtypes == 2:
+                    new_object = objects.ScrollsOfHP(self.screen, rows, cols)
+                elif subtypes == 3:
+                    new_object = objects.ScrollsOfINT(self.screen, rows, cols)
+                elif subtypes == 4:
+                    new_object = objects.ScrollsOfMP(self.screen, rows, cols)
+                elif subtypes == 5:
+                    new_object = objects.ScrollsOfSTR(self.screen, rows, cols)
+                elif subtypes == 6:
+                    new_object = objects.ScrollsOfTeleportation(self.screen, rows, cols)
+                else:
+                    new_object = objects.ScrollsOfResurrection(self.screen, rows, cols)
+
+                self.maze[rows][cols] = SCROLLS
+
+            elif types == 4:    # weapon
+                return
+
+            else:   # armor
+                return
+
+            self.object_list.append(new_object)
 
     # add monsters to the map.
 
@@ -109,10 +178,13 @@ class Maze:
 
     def is_wall(self, row, col):
 
-        if self.maze[row][col] == 1:
-            return True
-        else:
-            return False
+        return self.maze[row][col] == WALL
+
+    # given a row number and col number, return if it is a wall.
+
+    def is_stair(self, row, col):
+
+        return self.stair_down_col == col and self.stair_down_row == row
 
     # given a row number and col number, return the object at that position, or None if there is no pbject.
 
@@ -121,7 +193,6 @@ class Maze:
         for objects in self.object_list:
             if objects.row == row and objects.col == col:
                 return objects
-
         return None
 
     # display the content on the map.
@@ -130,8 +201,14 @@ class Maze:
 
         for i in range(self.MAX_ROW):
             for j in range(self.MAX_COL):
-                if self.maze[i][j] == 1:
+                if self.maze[i][j] == WALL:
                     pygame.draw.rect(self.screen, BROWN, [j*self.step, i*self.step, self.step, self.step])
+                elif self.maze[i][j] == STAIR:
+                    pygame.draw.rect(self.screen, WHITE, [j * self.step, i * self.step, self.step, self.step])
+                elif self.maze[i][j] == SCROLLS:
+                    pygame.draw.rect(self.screen, BLUE, [j * self.step, i * self.step, self.step, self.step])
+                elif self.maze[i][j] == POTION:
+                    pygame.draw.rect(self.screen, GREEN, [j * self.step, i * self.step, self.step, self.step])
 
     # generate a path between room
 

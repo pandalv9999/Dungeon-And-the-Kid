@@ -25,14 +25,15 @@ def distance_to(startPos, endPos):
 class Objects:
 
     owner = None
-    position = None
+    row = 0
+    col = 0
     screen = None
 
-    def __init__(self, screen, owner=None, position=None):
+    def __init__(self, row=0, col=0, owner=None):
 
         self.owner = owner
-        self.position = position
-        self.screen = screen
+        self.row = row
+        self.col = col
 
 
 ########################################################################
@@ -44,9 +45,6 @@ class Objects:
 
 
 class Scrolls(Objects):
-
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
 
     def display(self):
 
@@ -140,9 +138,6 @@ class ScrollsOfResurrection(Scrolls):
 
 class Potions(Objects):
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
-
     def display(self):
 
         # display the scrolls if it is in screen
@@ -220,8 +215,8 @@ class Weapons(Objects):
     durability = 0
     MAX_ATK_distance = 0
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
 
 
 class MeleeWeapons(Weapons):
@@ -258,8 +253,8 @@ class Armors(Objects):
     durability = 0
     MAX_ATK_distance = 0
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
 
 
 
