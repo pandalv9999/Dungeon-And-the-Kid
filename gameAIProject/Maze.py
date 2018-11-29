@@ -4,11 +4,15 @@ import pygame
 
 WHITE = (255, 255, 255)
 BROWN = (90, 39, 41)
+YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 NULL = 0
 WALL = 1
+ARMORS = 6
+WEAPONS = 7
 POTION = 8
 SCROLLS = 9
 STAIR = 10
@@ -162,10 +166,43 @@ class Maze:
                 self.maze[rows][cols] = SCROLLS
 
             elif types == 4:    # weapon
-                return
+
+                subtypes = randint(0, 9)
+                if subtypes == 0:
+                    new_object = objects.ShortSword(self.screen, rows, cols)
+                elif subtypes == 1:
+                    new_object = objects.LongSword(self.screen, rows, cols)
+                elif subtypes == 2:
+                    new_object = objects.HeavySword(self.screen, rows, cols)
+                elif subtypes == 3:
+                    new_object = objects.WoodStaff(self.screen, rows, cols)
+                elif subtypes == 4:
+                    new_object = objects.WindStaff(self.screen, rows, cols)
+                elif subtypes == 5:
+                    new_object = objects.WaterStaff(self.screen, rows, cols)
+                elif subtypes == 6:
+                    new_object = objects.FireStaff(self.screen, rows, cols)
+                elif subtypes == 7:
+                    new_object = objects.SleepFang(self.screen, rows, cols)
+                else:
+                    new_object = objects.AlchemyBomb(self.screen, rows, cols)
+
+                self.maze[rows][cols] = WEAPONS
 
             else:   # armor
-                return
+                subtypes = randint(0, 9)
+                if subtypes in range(0, 3):
+                    new_object = objects.Robe(self.screen, rows, cols)
+                elif subtypes in range(3, 6):
+                    new_object = objects.ChainMail(self.screen, rows, cols)
+                elif subtypes == 6:
+                    new_object = objects.Plate(self.screen, rows, cols)
+                elif subtypes == 7 or subtypes == 8:
+                    new_object = objects.RoundShield(self.screen, rows, cols)
+                else:
+                    new_object = objects.TowerShield(self.screen, rows, cols)
+
+                self.maze[rows][cols] = ARMORS
 
             self.object_list.append(new_object)
 
@@ -209,6 +246,10 @@ class Maze:
                     pygame.draw.rect(self.screen, BLUE, [j * self.step, i * self.step, self.step, self.step])
                 elif self.maze[i][j] == POTION:
                     pygame.draw.rect(self.screen, GREEN, [j * self.step, i * self.step, self.step, self.step])
+                elif self.maze[i][j] == ARMORS:
+                    pygame.draw.rect(self.screen, RED, [j * self.step, i * self.step, self.step, self.step])
+                elif self.maze[i][j] == WEAPONS:
+                    pygame.draw.rect(self.screen, YELLOW, [j * self.step, i * self.step, self.step, self.step])
 
     # generate a path between room
 
