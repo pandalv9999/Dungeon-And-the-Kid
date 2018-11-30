@@ -18,6 +18,17 @@ POTION = 8
 SCROLLS = 9
 STAIR = 10
 
+IMAGE_LIBRARY = {}
+
+
+def get_image(path):
+    global IMAGE_LIBRARY
+    image = IMAGE_LIBRARY.get(path)
+    if image is None:
+        image = pygame.image.load(path)
+        IMAGE_LIBRARY[path] = image
+    return image
+
 ########################################################################
 #   The file of code defines the The maze of the game                  #
 ########################################################################
@@ -277,17 +288,23 @@ class Maze:
         for i in range(self.MAX_ROW):
             for j in range(self.MAX_COL):
                 if self.maze[i][j] == WALL:
-                    pygame.draw.rect(self.screen, BROWN, [j*self.step, i*self.step, self.step, self.step])
+                    image = get_image('wall.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
                 elif self.maze[i][j] == STAIR:
-                    pygame.draw.rect(self.screen, WHITE, [j * self.step, i * self.step, self.step, self.step])
+                    image = get_image('stair.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
                 elif self.maze[i][j] == SCROLLS:
-                    pygame.draw.rect(self.screen, BLUE, [j * self.step, i * self.step, self.step, self.step])
+                    image = get_image('scroll.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
                 elif self.maze[i][j] == POTION:
-                    pygame.draw.rect(self.screen, GREEN, [j * self.step, i * self.step, self.step, self.step])
+                    image = get_image('potion.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
                 elif self.maze[i][j] == ARMORS:
-                    pygame.draw.rect(self.screen, RED, [j * self.step, i * self.step, self.step, self.step])
+                    image = get_image('shield.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
                 elif self.maze[i][j] == WEAPONS:
-                    pygame.draw.rect(self.screen, YELLOW, [j * self.step, i * self.step, self.step, self.step])
+                    image = get_image('weapon.jpg')
+                    self.screen.blit(image, (j * self.step, i * self.step), [0, 0, self.step, self.step])
 
         # Moving characters
 

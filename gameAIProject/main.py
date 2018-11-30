@@ -16,8 +16,18 @@ GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 
 SIZE = [1300, 800]
-
 PAUSE = False
+
+IMAGE_LIBRARY = {}
+
+
+def get_image(path):
+    global IMAGE_LIBRARY
+    image = IMAGE_LIBRARY.get(path)
+    if image is None:
+        image = pygame.image.load(path)
+        IMAGE_LIBRARY[path] = image
+    return image
 
 
 def equip_or_use(player, num):
@@ -114,6 +124,9 @@ def show_status(screen, player):
         screen.blit(experience, (120, 240))
         pygame.draw.rect(screen, RED, [320, 240, 300, 20])
         pygame.draw.rect(screen, YELLOW, [320, 240, 300 * (player.EXP / player.get_max_exp()), 20])
+
+        image = get_image('kid_large.jpg')
+        screen.blit(image, (350, 280), [0, 0, 200, 200])
 
         text = "LVL: " + str(player.level)
         font = pygame.font.SysFont("times", 30)

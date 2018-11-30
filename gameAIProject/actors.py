@@ -11,6 +11,18 @@ DOWN = 2
 LEFT = 3
 RIGHT = 4
 
+
+IMAGE_LIBRARY = {}
+
+
+def get_image(path):
+    global IMAGE_LIBRARY
+    image = IMAGE_LIBRARY.get(path)
+    if image is None:
+        image = pygame.image.load(path)
+        IMAGE_LIBRARY[path] = image
+    return image
+
 ########################################################################
 #   The file of code defines the The actors of the game                #
 ########################################################################
@@ -155,7 +167,16 @@ class Player(Actors):
         return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
 
     def display(self):
-        pygame.draw.rect(self.maze.screen, PURPLE, [self.col * 20, self.row * 20, 20, 20])
+
+        image = get_image('kid.jpg')
+        if self.orientation == DOWN:
+            image = pygame.transform.rotate(image, -90)
+        elif self.orientation == UP:
+            image = pygame.transform.rotate(image, 90)
+        elif self.orientation == LEFT:
+            image = pygame.transform.flip(image, True, False)
+        self.maze.screen.blit(image, (self.col * 20, self.row * 20), [0, 0, 20, 20])
+
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 14, 50, 5])
         pygame.draw.rect(self.maze.screen, GREEN,
                          [self.col * 20 - 15, self.row * 20 - 14, 50 * (self.HP / self.MAX_HP), 5])
