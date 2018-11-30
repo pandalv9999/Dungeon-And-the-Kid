@@ -8,6 +8,7 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+PURPLE = (238, 130, 238)
 
 NULL = 0
 WALL = 1
@@ -25,6 +26,7 @@ STAIR = 10
 class Maze:
 
     screen = None
+    player = None
     levels = 0
     object_list = []
     monster_list = []
@@ -211,6 +213,22 @@ class Maze:
     def add_monsters(self):
         return
 
+    # put the player to the map
+
+    def add_player(self, player):
+
+        start_room = self.room_list[0]
+
+        while True:
+            row = start_room.top_left_rows + randint(1, start_room.height - 1)
+            col = start_room.top_left_cols + randint(1, start_room.width - 1)
+            if self.maze[row][col] == NULL:
+                break
+
+        player.row = row
+        player.col = col
+        self.player = player
+
     # given a row number and col number, return if it is a wall.
 
     def is_wall(self, row, col):
@@ -236,6 +254,8 @@ class Maze:
 
     def display(self):
 
+        # Stationary Objects
+
         for i in range(self.MAX_ROW):
             for j in range(self.MAX_COL):
                 if self.maze[i][j] == WALL:
@@ -250,6 +270,10 @@ class Maze:
                     pygame.draw.rect(self.screen, RED, [j * self.step, i * self.step, self.step, self.step])
                 elif self.maze[i][j] == WEAPONS:
                     pygame.draw.rect(self.screen, YELLOW, [j * self.step, i * self.step, self.step, self.step])
+
+        # Moving characters
+
+        pygame.draw.rect(self.screen, PURPLE, [self.player.col * self.step, self.player.row * self.step, self.step, self.step])
 
     # generate a path between room
 

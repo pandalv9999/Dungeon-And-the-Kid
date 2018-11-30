@@ -210,6 +210,7 @@ class Weapons(Objects):
     DEF = 0
     INT = 0
     DEX = 0
+    MAX_HP = 0
     durability = 0
     MAX_ATK_distance = 0
 
@@ -296,7 +297,7 @@ class WaterStaff(SorceryWeapons):
     def __init__(self, row=0, col=0, owner=None):
         Objects.__init__(self, row, col, owner)
         self.INT = 5 + randint(0, 10)
-        self.owner.MAX_HP = 500 + randint(0, 500)
+        self.MAX_HP = 500 + randint(0, 500)
         self.durability = 200
 
 
