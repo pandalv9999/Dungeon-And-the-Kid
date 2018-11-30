@@ -329,6 +329,9 @@ class SleepFang(SorceryWeapons):
 
 class AlchemyBomb(Weapons):
 
+    def __str__(self):
+        return "Alchemy Bomb"
+
     def attack(self):
         # Generate a bomb on the ground.
         return

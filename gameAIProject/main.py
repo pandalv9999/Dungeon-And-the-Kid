@@ -101,9 +101,39 @@ def show_status(screen, player):
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 560))
 
-        keys = pygame.key.get_pressed()
+        text = "Press 'z' to resume game. "
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, YELLOW)
+        screen.blit(text, (120, 650))
 
-        if keys[pygame.K_b]:
+        text = "Press corresponding button to equip"
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, YELLOW)
+        screen.blit(text, (120, 670))
+
+        text = "or use items in inventory."
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, YELLOW)
+        screen.blit(text, (150, 690))
+
+        caption = "Inventory"
+        font = pygame.font.SysFont("times", 50)
+        caption = font.render(caption, True, WHITE)
+        screen.blit(caption, (700, 100))
+
+        number = 97
+        start = 180
+
+        for objects in player.inventory:
+            text = chr(number) + ".   " + str(objects)
+            font = pygame.font.SysFont("times", 30)
+            text = font.render(text, True, WHITE)
+            screen.blit(text, (720, start))
+            number += 1
+            start += 27
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_z]:
             PAUSE = False
 
         pygame.display.update()
@@ -133,7 +163,7 @@ if __name__ == "__main__":
 
         # player take actions.
 
-        if pygame.time.get_ticks() - move_time > (200 - player.DEX):   # depends by DEX
+        if pygame.time.get_ticks() - move_time > (0 - player.DEX):   # depends by DEX. 200. for test, 0
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 player.move(LEFT)

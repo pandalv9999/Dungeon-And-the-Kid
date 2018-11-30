@@ -26,6 +26,10 @@ class Actors:
     col = 0
     orientation = 0
 
+    armor = None
+    weapon = None
+    shield = None
+
     maze = None
 
     def __init__(self, maze, row, col):
@@ -35,6 +39,7 @@ class Actors:
 
     def unchecked_move(self, direction):
 
+        self.orientation = direction
         if direction == UP:
             self.row -= 1
         elif direction == DOWN:
@@ -55,43 +60,6 @@ class Actors:
         elif direction == RIGHT and self.maze.is_wall(self.row, self.col + 1):
             return True
         return False
-
-
-class Player(Actors):
-
-    EXP = 0
-
-    inventory = []
-    armor = None
-    weapon = None
-    shield = None
-
-    def __init__(self, maze, row=0, col=0):
-        Actors.__init__(self, maze, row, col)
-        self.level = 1
-        self.MAX_HP = 500
-        self.HP = 500
-        self.MAX_MP = 100
-        self.MP = 100
-        self.weapon = objects.ShortSword(0, 0, self)
-
-    def move(self, direction):
-        if not self.is_wall_ahead(direction):
-            self.unchecked_move(direction)
-
-    def pick_up(self):
-
-        if len(self.inventory) > 20:    # max inventory is 20
-            return
-
-        if self.maze.is_object(self.row, self.col):
-            objects = self.maze.object_at(self.row, self.col)
-            objects.owner = self
-            self.inventory.append(objects)
-            self.maze.remove_object(objects)
-
-    def get_max_exp(self):
-        return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
 
     def total_str(self):
 
@@ -147,4 +115,36 @@ class Player(Actors):
             total_MAX_HP += self.armor.MAX_HP
         return total_MAX_HP
 
+
+class Player(Actors):
+
+    EXP = 0
+    inventory = []
+
+    def __init__(self, maze, row=0, col=0):
+        Actors.__init__(self, maze, row, col)
+        self.level = 1
+        self.MAX_HP = 500
+        self.HP = 500
+        self.MAX_MP = 100
+        self.MP = 100
+        self.weapon = objects.ShortSword(0, 0, self)
+
+    def move(self, direction):
+        if not self.is_wall_ahead(direction):
+            self.unchecked_move(direction)
+
+    def pick_up(self):
+
+        if len(self.inventory) > 20:    # max inventory is 20
+            return
+
+        if self.maze.is_object(self.row, self.col):
+            objects = self.maze.object_at(self.row, self.col)
+            objects.owner = self
+            self.inventory.append(objects)
+            self.maze.remove_object(objects)
+
+    def get_max_exp(self):
+        return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
 
