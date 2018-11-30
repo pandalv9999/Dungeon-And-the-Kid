@@ -48,6 +48,9 @@ class Scrolls(Objects):
         # display the scrolls if it is in screen
         return
 
+    def use(self):
+        return
+
 
 class ScrollsOfSTR(Scrolls):
 
@@ -138,6 +141,9 @@ class Potions(Objects):
     def display(self):
 
         # display the scrolls if it is in screen
+        return
+
+    def use(self):
         return
 
 
@@ -343,6 +349,7 @@ class Armors(Objects):
     DEF = 0
     INT = 0
     DEX = 0
+    MAX_HP = 0
     durability = 0
     MAX_ATK_distance = 0
 
@@ -382,6 +389,7 @@ class Plate(Armors):
         Objects.__init__(self, row, col, owner)
         self.DEF = 20 + randint(0, 30)
         self.DEX = -5 - randint(0, 10)
+        self.MAX_HP = 500 + randint(0, 500)
         self.durability = 200
 
 
@@ -407,6 +415,7 @@ class TowerShield(Armors):
         self.DEF = 20 + randint(0, 30)
         self.STR = 20 + randint(0, 30)
         self.DEX = -20 - randint(0, 30)
+        self.MAX_HP = 1000 + randint(0, 500)
         self.durability = 200
 
 

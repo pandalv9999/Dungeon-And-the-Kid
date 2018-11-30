@@ -1,4 +1,10 @@
 from gameAIProject import objects
+import pygame
+
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+PURPLE = (238, 130, 238)
 
 UP = 1
 DOWN = 2
@@ -148,3 +154,11 @@ class Player(Actors):
     def get_max_exp(self):
         return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
 
+    def display(self):
+        pygame.draw.rect(self.maze.screen, PURPLE, [self.col * 20, self.row * 20, 20, 20])
+        pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 14, 50, 5])
+        pygame.draw.rect(self.maze.screen, GREEN,
+                         [self.col * 20 - 15, self.row * 20 - 14, 50 * (self.HP / self.MAX_HP), 5])
+        pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
+        pygame.draw.rect(self.maze.screen, BLUE,
+                         [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.MP / self.MAX_MP), 5])

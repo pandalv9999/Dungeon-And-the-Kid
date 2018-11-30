@@ -54,14 +54,16 @@ class Maze:
         # Initialize the maze with all walls.
 
         for r in range(self.MAX_ROW):
+            print(r)
             rows = []
             for c in range(self.MAX_COL):
                 rows.append(WALL)
             self.maze.append(rows)
 
         # generate random Rooms
+        print(self.maze)
 
-        number_rooms = randint(7, 10)
+        number_rooms = randint(7, 9)
 
         for i in range(number_rooms):
 
@@ -77,7 +79,7 @@ class Maze:
 
                 for a in range(top_left_row - 1, min(self.MAX_ROW, (top_left_row + height + 1))):
                     for b in range(top_left_col - 1, min(self.MAX_COL, (top_left_col + width + 1))):
-                        if a > self.MAX_ROW or b > self.MAX_COL or self.maze[a][b] == 0:
+                        if a > self.MAX_ROW or b > self.MAX_COL or self.maze[a][b] == NULL:
                             is_occupied = True
 
                 if top_left_row + height + 1 > self.MAX_ROW or top_left_col + width + 1 > self.MAX_COL:
@@ -91,7 +93,7 @@ class Maze:
 
             for a in range(top_left_row, top_left_row + height):
                 for b in range(top_left_col, top_left_col + width):
-                    self.maze[a][b] = 0
+                    self.maze[a][b] = NULL
 
         # sort the room to make it neat
 
@@ -285,7 +287,7 @@ class Maze:
 
         # Moving characters
 
-        pygame.draw.rect(self.screen, PURPLE, [self.player.col * self.step, self.player.row * self.step, self.step, self.step])
+        self.player.display()
 
     # generate a path between room
 

@@ -1,7 +1,7 @@
 import sys
 import pygame
 from pygame.locals import *
-from gameAIProject import maze, actors
+from gameAIProject import maze, actors, objects
 
 UP = 1
 DOWN = 2
@@ -18,6 +18,60 @@ YELLOW = (255, 255, 0)
 SIZE = [1300, 800]
 
 PAUSE = False
+
+
+def equip_or_use(player, num):
+    if len(player.inventory) > num:
+        o = player.inventory[num]
+        if isinstance(o, objects.Potions) or isinstance(o, objects.Scrolls):
+            if not isinstance(o, objects.ScrollsOfResurrection):
+                o.use()
+                player.inventory.remove(o)
+        elif isinstance(o, objects.Weapons):
+            if not isinstance(player.shield, objects.TowerShield):
+                if isinstance(o, objects.HeavySword):
+                    player.inventory.append(player.shield)
+                    player.shield = None
+                temp = player.weapon
+                player.weapon = o
+                player.inventory.remove(o)
+                if temp is not None:
+                    player.inventory.append(temp)
+        elif isinstance(o, objects.Armors):
+            if isinstance(o, objects.RoundShield) or isinstance(o, objects.TowerShield):
+                if not isinstance(player.weapon, objects.HeavySword):
+                    if isinstance(o, objects.TowerShield):
+                        player.inventory.append(player.weapon)
+                        player.weapon = None
+                    temp = player.shield
+                    player.shield = o
+                    player.inventory.remove(o)
+                    if temp is not None:
+                        player.inventory.append(temp)
+            else:
+                temp = player.armor
+                player.armor = o
+                player.inventory.remove(o)
+                if temp is not None:
+                    player.inventory.append(temp)
+
+
+def throw_last(player):
+    if player.maze.maze[player.row][player.col] == 0 and len(player.inventory) > 0:
+        o = player.inventory[len(player.inventory) - 1]
+        player.inventory.remove(o)
+        o.row = player.row
+        o.col = player.col
+        o.owner = None
+        player.maze.object_list.append(o)
+        if isinstance(o, objects.Armors):
+            player.maze.maze[player.row][player.col] = 6
+        if isinstance(o, objects.Weapons):
+            player.maze.maze[player.row][player.col] = 7
+        if isinstance(o, objects.Potions):
+            player.maze.maze[player.row][player.col] = 8
+        if isinstance(o, objects.Scrolls):
+            player.maze.maze[player.row][player.col] = 9
 
 
 def show_status(screen, player):
@@ -86,17 +140,17 @@ def show_status(screen, player):
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 420))
 
-        text = "ARMOR: " + str(player.armor)
+        text = "(w) ARMOR: " + str(player.armor)
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 500))
 
-        text = "WEAPON: " + str(player.weapon)
+        text = "(x) WEAPON: " + str(player.weapon)
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 530))
 
-        text = "SHIELD: " + str(player.shield)
+        text = "(y) SHIELD: " + str(player.shield)
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 560))
@@ -104,17 +158,27 @@ def show_status(screen, player):
         text = "Press 'z' to resume game. "
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, YELLOW)
-        screen.blit(text, (120, 650))
+        screen.blit(text, (120, 630))
 
         text = "Press corresponding button to equip"
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, YELLOW)
-        screen.blit(text, (120, 670))
+        screen.blit(text, (120, 650))
 
-        text = "or use items in inventory."
+        text = "or use items in inventory, "
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, YELLOW)
+        screen.blit(text, (150, 670))
+
+        text = "or un_equip items. "
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, YELLOW)
         screen.blit(text, (150, 690))
+
+        text = "Press 'u' to throw last items in inventory"
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, YELLOW)
+        screen.blit(text, (120, 710))
 
         caption = "Inventory"
         font = pygame.font.SysFont("times", 50)
@@ -124,8 +188,8 @@ def show_status(screen, player):
         number = 97
         start = 180
 
-        for objects in player.inventory:
-            text = chr(number) + ".   " + str(objects)
+        for o in player.inventory:
+            text = chr(number) + ".   " + str(o)
             font = pygame.font.SysFont("times", 30)
             text = font.render(text, True, WHITE)
             screen.blit(text, (720, start))
@@ -135,6 +199,60 @@ def show_status(screen, player):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_z]:
             PAUSE = False
+        elif keys[pygame.K_a]:
+            equip_or_use(player, 0)
+        elif keys[pygame.K_b]:
+            equip_or_use(player, 1)
+        elif keys[pygame.K_c]:
+            equip_or_use(player, 2)
+        elif keys[pygame.K_d]:
+            equip_or_use(player, 3)
+        elif keys[pygame.K_e]:
+            equip_or_use(player, 4)
+        elif keys[pygame.K_f]:
+            equip_or_use(player, 5)
+        elif keys[pygame.K_g]:
+            equip_or_use(player, 6)
+        elif keys[pygame.K_h]:
+            equip_or_use(player, 7)
+        elif keys[pygame.K_i]:
+            equip_or_use(player, 8)
+        elif keys[pygame.K_j]:
+            equip_or_use(player, 9)
+        elif keys[pygame.K_k]:
+            equip_or_use(player, 10)
+        elif keys[pygame.K_l]:
+            equip_or_use(player, 11)
+        elif keys[pygame.K_m]:
+            equip_or_use(player, 12)
+        elif keys[pygame.K_n]:
+            equip_or_use(player, 13)
+        elif keys[pygame.K_o]:
+            equip_or_use(player, 14)
+        elif keys[pygame.K_p]:
+            equip_or_use(player, 15)
+        elif keys[pygame.K_q]:
+            equip_or_use(player, 16)
+        elif keys[pygame.K_r]:
+            equip_or_use(player, 17)
+        elif keys[pygame.K_s]:
+            equip_or_use(player, 18)
+        elif keys[pygame.K_t]:
+            equip_or_use(player, 19)
+        elif keys[pygame.K_w]:
+            if player.armor is not None and len(player.inventory) <= 20:
+                player.inventory.append(player.armor)
+                player.armor = None
+        elif keys[pygame.K_x]:
+            if player.weapon is not None and len(player.inventory) <= 20:
+                player.inventory.append(player.weapon)
+                player.weapon = None
+        elif keys[pygame.K_y]:
+            if player.shield is not None and len(player.inventory) <= 20:
+                player.inventory.append(player.shield)
+                player.shield = None
+        elif keys[pygame.K_u]:
+            throw_last(player)
 
         pygame.display.update()
 
@@ -145,7 +263,8 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode(SIZE)
     pygame.display.set_caption("Dungeon")
 
-    background = maze.Maze(screen, 0)
+    current_lvl = 0
+    background = maze.Maze(screen, current_lvl)
     player = actors.Player(background)
     background.add_player(player)
 
@@ -178,7 +297,15 @@ if __name__ == "__main__":
             elif keys[pygame.K_i]:
                 PAUSE = True
                 show_status(screen, player)
-                pygame.draw.rect(screen, BLACK, [300, 300, 700, 200])
+            elif keys[pygame.K_n]:
+                if background.is_stair(player.row, player.col):
+                    current_lvl += 1
+                    del background
+                    background = maze.Maze(screen, current_lvl)
+                    player.maze = background
+                    background.add_player(player)
+                    continue
+
             move_time = pygame.time.get_ticks()
 
         background.display()
