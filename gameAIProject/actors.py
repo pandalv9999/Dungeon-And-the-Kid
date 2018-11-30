@@ -1,3 +1,5 @@
+from gameAIProject import objects
+
 UP = 1
 DOWN = 2
 LEFT = 3
@@ -18,6 +20,7 @@ class Actors:
     MAX_HP = 0
     MP = 0
     MAX_MP = 0
+    level = 0
 
     row = 0
     col = 0
@@ -56,6 +59,8 @@ class Actors:
 
 class Player(Actors):
 
+    EXP = 0
+
     inventory = []
     armor = None
     weapon = None
@@ -63,15 +68,83 @@ class Player(Actors):
 
     def __init__(self, maze, row=0, col=0):
         Actors.__init__(self, maze, row, col)
+        self.level = 1
+        self.MAX_HP = 500
+        self.HP = 500
+        self.MAX_MP = 100
+        self.MP = 100
+        self.weapon = objects.ShortSword(0, 0, self)
 
     def move(self, direction):
         if not self.is_wall_ahead(direction):
             self.unchecked_move(direction)
 
     def pick_up(self):
+
+        if len(self.inventory) > 20:    # max inventory is 20
+            return
+
         if self.maze.is_object(self.row, self.col):
             objects = self.maze.object_at(self.row, self.col)
+            objects.owner = self
             self.inventory.append(objects)
             self.maze.remove_object(objects)
+
+    def get_max_exp(self):
+        return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
+
+    def total_str(self):
+
+        total_STR = self.STR
+        if self.weapon is not None:
+            total_STR += self.weapon.STR
+        if self.shield is not None:
+            total_STR += self.shield.STR
+        if self.armor is not None:
+            total_STR += self.armor.STR
+        return total_STR
+
+    def total_def(self):
+
+        total_DEF = self.DEF
+        if self.weapon is not None:
+            total_DEF += self.weapon.DEF
+        if self.shield is not None:
+            total_DEF += self.shield.DEF
+        if self.armor is not None:
+            total_DEF += self.armor.DEF
+        return total_DEF
+
+    def total_int(self):
+
+        total_INT = self.INT
+        if self.weapon is not None:
+            total_INT += self.weapon.INT
+        if self.shield is not None:
+            total_INT += self.shield.INT
+        if self.armor is not None:
+            total_INT += self.armor.INT
+        return total_INT
+
+    def total_dex(self):
+
+        total_DEX = self.DEX
+        if self.weapon is not None:
+            total_DEX += self.weapon.DEX
+        if self.shield is not None:
+            total_DEX += self.shield.DEX
+        if self.armor is not None:
+            total_DEX += self.armor.DEX
+        return total_DEX
+
+    def total_max_hp(self):
+        total_MAX_HP = self.MAX_HP
+        if self.weapon is not None:
+            total_MAX_HP += self.weapon.MAX_HP
+        if self.shield is not None:
+            total_MAX_HP += self.shield.MAX_HP
+        if self.armor is not None:
+            total_MAX_HP += self.armor.MAX_HP
+        return total_MAX_HP
 
 
