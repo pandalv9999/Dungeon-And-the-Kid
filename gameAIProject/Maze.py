@@ -40,6 +40,12 @@ class Maze:
     stair_down_col = 0
 
     def __init__(self, screen, levels):
+        self.maze = []
+        self.object_list = []
+        self.monster_list = []
+        self.room_list = []
+        self.player = None
+        self.screen = None
         self.screen = screen
         self.levels = levels
         self.init_maze()
@@ -54,14 +60,12 @@ class Maze:
         # Initialize the maze with all walls.
 
         for r in range(self.MAX_ROW):
-            print(r)
             rows = []
             for c in range(self.MAX_COL):
                 rows.append(WALL)
             self.maze.append(rows)
 
         # generate random Rooms
-        print(self.maze)
 
         number_rooms = randint(7, 9)
 
