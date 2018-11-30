@@ -67,3 +67,11 @@ class Player(Actors):
     def move(self, direction):
         if not self.is_wall_ahead(direction):
             self.unchecked_move(direction)
+
+    def pick_up(self):
+        if self.maze.is_object(self.row, self.col):
+            objects = self.maze.object_at(self.row, self.col)
+            self.inventory.append(objects)
+            self.maze.remove_object(objects)
+
+

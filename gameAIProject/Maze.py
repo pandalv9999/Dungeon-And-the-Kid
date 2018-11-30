@@ -133,15 +133,15 @@ class Maze:
 
                 subtypes = randint(0, 31)
                 if subtypes in range(0, 10):
-                    new_object = objects.HitPointPotion(self.screen, rows, cols)
+                    new_object = objects.HitPointPotion(rows, cols)
                 elif subtypes in range(10, 20):
-                    new_object = objects.MagicPointPotion(self.screen, rows, cols)
+                    new_object = objects.MagicPointPotion(rows, cols)
                 elif subtypes in range(20, 25):
-                    new_object = objects.HitPointSuperPotion(self.screen, rows, cols)
+                    new_object = objects.HitPointSuperPotion(rows, cols)
                 elif subtypes in range(25, 30):
-                    new_object = objects.MagicPointSuperPotion(self.screen, rows, cols)
+                    new_object = objects.MagicPointSuperPotion(rows, cols)
                 else:
-                    new_object = objects.Elixir(self.screen, rows, cols)
+                    new_object = objects.Elixir(rows, cols)
 
                 self.maze[rows][cols] = POTION
 
@@ -149,21 +149,21 @@ class Maze:
 
                 subtypes = randint(0, 7)
                 if subtypes == 0:
-                    new_object = objects.ScrollsOfDEF(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfDEF(rows, cols)
                 elif subtypes == 1:
-                    new_object = objects.ScrollsOfDEX(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfDEX(rows, cols)
                 elif subtypes == 2:
-                    new_object = objects.ScrollsOfHP(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfHP(rows, cols)
                 elif subtypes == 3:
-                    new_object = objects.ScrollsOfINT(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfINT(rows, cols)
                 elif subtypes == 4:
-                    new_object = objects.ScrollsOfMP(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfMP(rows, cols)
                 elif subtypes == 5:
-                    new_object = objects.ScrollsOfSTR(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfSTR(rows, cols)
                 elif subtypes == 6:
-                    new_object = objects.ScrollsOfTeleportation(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfTeleportation(rows, cols)
                 else:
-                    new_object = objects.ScrollsOfResurrection(self.screen, rows, cols)
+                    new_object = objects.ScrollsOfResurrection(rows, cols)
 
                 self.maze[rows][cols] = SCROLLS
 
@@ -171,38 +171,38 @@ class Maze:
 
                 subtypes = randint(0, 9)
                 if subtypes == 0:
-                    new_object = objects.ShortSword(self.screen, rows, cols)
+                    new_object = objects.ShortSword(rows, cols)
                 elif subtypes == 1:
-                    new_object = objects.LongSword(self.screen, rows, cols)
+                    new_object = objects.LongSword(rows, cols)
                 elif subtypes == 2:
-                    new_object = objects.HeavySword(self.screen, rows, cols)
+                    new_object = objects.HeavySword(rows, cols)
                 elif subtypes == 3:
-                    new_object = objects.WoodStaff(self.screen, rows, cols)
+                    new_object = objects.WoodStaff(rows, cols)
                 elif subtypes == 4:
-                    new_object = objects.WindStaff(self.screen, rows, cols)
+                    new_object = objects.WindStaff(rows, cols)
                 elif subtypes == 5:
-                    new_object = objects.WaterStaff(self.screen, rows, cols)
+                    new_object = objects.WaterStaff(rows, cols)
                 elif subtypes == 6:
-                    new_object = objects.FireStaff(self.screen, rows, cols)
+                    new_object = objects.FireStaff(rows, cols)
                 elif subtypes == 7:
-                    new_object = objects.SleepFang(self.screen, rows, cols)
+                    new_object = objects.SleepFang(rows, cols)
                 else:
-                    new_object = objects.AlchemyBomb(self.screen, rows, cols)
+                    new_object = objects.AlchemyBomb(rows, cols)
 
                 self.maze[rows][cols] = WEAPONS
 
             else:   # armor
                 subtypes = randint(0, 9)
                 if subtypes in range(0, 3):
-                    new_object = objects.Robe(self.screen, rows, cols)
+                    new_object = objects.Robe(rows, cols)
                 elif subtypes in range(3, 6):
-                    new_object = objects.ChainMail(self.screen, rows, cols)
+                    new_object = objects.ChainMail(rows, cols)
                 elif subtypes == 6:
-                    new_object = objects.Plate(self.screen, rows, cols)
+                    new_object = objects.Plate(rows, cols)
                 elif subtypes == 7 or subtypes == 8:
-                    new_object = objects.RoundShield(self.screen, rows, cols)
+                    new_object = objects.RoundShield(rows, cols)
                 else:
-                    new_object = objects.TowerShield(self.screen, rows, cols)
+                    new_object = objects.TowerShield(rows, cols)
 
                 self.maze[rows][cols] = ARMORS
 
@@ -241,7 +241,13 @@ class Maze:
 
         return self.stair_down_col == col and self.stair_down_row == row
 
-    # given a row number and col number, return the object at that position, or None if there is no pbject.
+    # give a row number and col number, return if it is a object.
+
+    def is_object(self, row, col):
+
+        return self.maze[row][col] in range(6, 10)
+
+    # given a row number and col number, return the object at that position, or None if there is no object.
 
     def object_at(self, row, col):
 
@@ -249,6 +255,12 @@ class Maze:
             if objects.row == row and objects.col == col:
                 return objects
         return None
+
+    # remove a particular object
+
+    def remove_object(self, objects):
+        self.object_list.remove(objects)
+        self.maze[objects.row][objects.col] = NULL
 
     # display the content on the map.
 

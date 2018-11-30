@@ -46,6 +46,8 @@ if __name__ == "__main__":
                 player.move(UP)
             elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
                 player.move(DOWN)
+            elif keys[pygame.K_p]:
+                player.pick_up()
             move_time = pygame.time.get_ticks()
 
         background.display()

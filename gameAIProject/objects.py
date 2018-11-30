@@ -25,7 +25,6 @@ class Objects:
     owner = None
     row = 0
     col = 0
-    screen = None
 
     def __init__(self, row=0, col=0, owner=None):
 
