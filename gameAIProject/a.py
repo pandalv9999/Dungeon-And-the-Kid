@@ -427,6 +427,7 @@ if __name__ == "__main__":
         monster2.display(map)
 
         for event in pygame.event.get():
+
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()

@@ -1,5 +1,5 @@
 from random import randint
-import numpy as np
+import math
 
 # The global parameters of the screen
 
@@ -7,11 +7,8 @@ MAX_ROW = 0
 MAX_COL = 0
 
 
-def distance_to(startPos, endPos):
-
-    direction = endPos - startPos
-    distance = np.linalg.norm(direction)
-    return distance
+def distance_to(sr, sc, tr, tc):
+    return math.sqrt((tr - sr) * (tr - sr) + (tc - sc) * (tc - sc))
 
 
 ########################################################################
@@ -25,14 +22,14 @@ def distance_to(startPos, endPos):
 class Objects:
 
     owner = None
-    position = None
-    screen = None
+    row = 0
+    col = 0
 
-    def __init__(self, screen, owner=None, position=None):
+    def __init__(self, row=0, col=0, owner=None):
 
         self.owner = owner
-        self.position = position
-        self.screen = screen
+        self.row = row
+        self.col = col
 
 
 ########################################################################
@@ -45,12 +42,12 @@ class Objects:
 
 class Scrolls(Objects):
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
-
     def display(self):
 
         # display the scrolls if it is in screen
+        return
+
+    def use(self):
         return
 
 
@@ -114,10 +111,7 @@ class ScrollsOfTeleportation(Scrolls):
         return "Scroll of Teleportation"
 
     def use(self):
-        # create randpos in the map, depending on the max_col and max_row, and whether there is walls.
-        # To be implemented.
-        randpos = 0
-        self.owner.position = randpos
+        self.owner.maze.add_player_randomly(self.owner)
 
 
 class ScrollsOfResurrection(Scrolls):
@@ -140,12 +134,12 @@ class ScrollsOfResurrection(Scrolls):
 
 class Potions(Objects):
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
-
     def display(self):
 
         # display the scrolls if it is in screen
+        return
+
+    def use(self):
         return
 
 
@@ -217,32 +211,128 @@ class Weapons(Objects):
     DEF = 0
     INT = 0
     DEX = 0
+    MAX_HP = 0
     durability = 0
     MAX_ATK_distance = 0
-
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
 
 
 class MeleeWeapons(Weapons):
 
     def attack(self, target):
-
-        if distance_to(self.owner.position, target.position) <= self.MAX_ATK_distance:
             # do the attack
-            return
+        return
 
 
-class SorceriesWeapons(Weapons):
+class ShortSword(MeleeWeapons):
+
+    def __str__(self):
+        return "Short Sword"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.STR = 5 + randint(0, 10)
+        self.durability = 50
+
+
+class LongSword(MeleeWeapons):
+
+    def __str__(self):
+        return "Long Sword"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.STR = 10 + randint(0, 15)
+        self.durability = 100
+
+
+class HeavySword(MeleeWeapons):
+
+    def __str__(self):
+        return "Heavy Sword"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.STR = 20 + randint(0, 30)
+        self.DEF = 5 + randint(0, 10)
+        self.DEX = -5 - randint(0, 10)
+        self.durability = 200
+
+
+class SorceryWeapons(Weapons):
 
     def attack(self, target):
 
-        if distance_to(self.owner.position, target.position) <= self.MAX_ATK_distance:
             # generate a bullet
-            return
+        return
+
+
+class WoodStaff(SorceryWeapons):
+
+    def __str__(self):
+        return "Wood Staff"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.INT = 5 + randint(0, 10)
+        self.DEF = 5 + randint(0, 10)
+        self.durability = 100
+
+
+class WindStaff(SorceryWeapons):
+
+    def __str__(self):
+        return "Wind Staff"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.INT = 5 + randint(0, 10)
+        self.DEX = 5 + randint(0, 10)
+        self.durability = 100
+
+
+class WaterStaff(SorceryWeapons):
+
+    def __str__(self):
+        return "Water Staff"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.INT = 5 + randint(0, 10)
+        self.MAX_HP = 500 + randint(0, 500)
+        self.durability = 200
+
+
+class FireStaff(SorceryWeapons):
+
+    def __str__(self):
+        return "Fire Staff"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.INT = 20 + randint(0, 30)
+        self.DEF = -5 - randint(0, 10)
+        self.durability = 50
+
+
+class SleepFang(SorceryWeapons):
+
+    def __str__(self):
+        return "Sleep Fang"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.INT = 5 + randint(0, 10)
+        self.durability = 50
+
+    def attack(self, target):
+        # Attack can make enemy sleep
+        return
 
 
 class AlchemyBomb(Weapons):
+
+    def __str__(self):
+        return "Alchemy Bomb"
 
     def attack(self):
         # Generate a bomb on the ground.
@@ -255,11 +345,76 @@ class Armors(Objects):
     DEF = 0
     INT = 0
     DEX = 0
+    MAX_HP = 0
     durability = 0
     MAX_ATK_distance = 0
 
-    def __init__(self, screen, owner=None, position=None):
-        Objects.__init__(screen, owner, position)
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+
+
+class Robe(Armors):
+
+    def __str__(self):
+        return "Robe"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.DEF = 5 + randint(0, 10)
+        self.INT = 5 + randint(0, 10)
+        self.durability = 50
+
+
+class ChainMail(Armors):
+
+    def __str__(self):
+        return "Chain mail"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.DEF = 10 + randint(0, 13)
+        self.durability = 100
+
+
+class Plate(Armors):
+
+    def __str__(self):
+        return "Plate"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.DEF = 20 + randint(0, 30)
+        self.DEX = -5 - randint(0, 10)
+        self.MAX_HP = 500 + randint(0, 500)
+        self.durability = 200
+
+
+class RoundShield(Armors):
+
+    def __str__(self):
+        return "Round Shield"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.DEF = 5 + randint(0, 10)
+        self.STR = 5 + randint(0, 10)
+        self.durability = 50
+
+
+class TowerShield(Armors):
+
+    def __str__(self):
+        return "Tower Shield"
+
+    def __init__(self, row=0, col=0, owner=None):
+        Objects.__init__(self, row, col, owner)
+        self.DEF = 20 + randint(0, 30)
+        self.STR = 20 + randint(0, 30)
+        self.DEX = -20 - randint(0, 30)
+        self.MAX_HP = 1000 + randint(0, 500)
+        self.durability = 200
+
+
 
 
 
