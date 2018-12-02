@@ -1,5 +1,7 @@
 from gameAIProject import objects
 import pygame
+import math
+from random import randint
 
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
@@ -23,6 +25,119 @@ def get_image(path):
         IMAGE_LIBRARY[path] = image
     return image
 
+def distance_to(sr, sc, tr, tc):
+    return math.sqrt((tr - sr) * (tr - sr) + (tc - sc) * (tc - sc))
+
+
+########################################################################
+#   The file of code defines the The FSM of actors in the game         #
+########################################################################
+
+State = type("State", (object,), {})
+
+
+class Idle(object):
+
+    monster = None
+
+    def __init__(self, monster):
+        self.monster = monster
+
+    def execute(self):
+        # To be implemented
+        return
+
+
+class Wander(object):
+
+    monster = None
+
+    def __init__(self, monster):
+        self.monster = monster
+
+    def execute(self):
+        # To be implemented
+        return
+
+
+class Approach(object):
+
+    target = None
+    monster = None
+
+    def __init__(self, monster, target):
+        self.target = target
+        self.monster = monster
+
+    def execute(self):
+        # To be implemented
+        return
+
+
+class Attack(object):
+
+    target = None
+    monster = None
+
+    def __init__(self, monster, target):
+        self.target = target
+        self.monster = monster
+
+    def execute(self):
+        # To be implemented
+        return
+
+
+class Flee(object):
+
+    target = None
+    monster = None
+
+    def __init__(self, monster, target):
+
+        self.target = target
+        self.monster = monster
+
+    def execute(self):
+        # To be implemented
+        return
+
+
+class Transition(object):
+
+    to_state = None
+
+    def __init__(self, to_state):
+
+        self.to_state = to_state
+
+
+class FSM(object):
+
+    def __init__(self, character):
+
+        self.character = character
+        self.states = {}
+        self.transitions = {}
+        self.current_state = None
+        self.currentTransition = None
+
+    def set_state(self, state_name):
+        self.current_state = self.states[state_name]
+
+    def transition(self, transition_name):
+        self.currentTransition = self.transitions[transition_name]
+
+    def execute(self):
+
+        if self.currentTransition:
+
+            self.set_state(self.currentTransition.to_state)
+            self.currentTransition = None
+
+        self.current_state.execute()
+
+
 ########################################################################
 #   The file of code defines the The actors of the game                #
 ########################################################################
@@ -42,7 +157,7 @@ class Actors:
 
     row = 0
     col = 0
-    orientation = 0
+    orientation = 1
 
     armor = None
     weapon = None
@@ -134,6 +249,11 @@ class Actors:
         return total_MAX_HP
 
 
+########################################################################
+#   The file of code defines the The player of the game                #
+########################################################################
+
+
 class Player(Actors):
 
     EXP = 0
@@ -146,6 +266,10 @@ class Player(Actors):
         self.HP = 500
         self.MAX_MP = 100
         self.MP = 100
+        self.DEX = 2
+        self.DEF = 2
+        self.INT = 2
+        self.STR = 2
         self.weapon = objects.ShortSword(0, 0, self)
 
     def move(self, direction):
@@ -183,3 +307,145 @@ class Player(Actors):
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
         pygame.draw.rect(self.maze.screen, BLUE,
                          [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.MP / self.MAX_MP), 5])
+
+
+########################################################################
+#   The file of code defines the The monster of the game               #
+########################################################################
+
+# Monster is initialized after the player is added to the map.
+
+class Monster(Actors):
+
+    player = None
+    fsm = None
+    last_path_finding = 0
+    last_movement = 0
+    path = None
+    PATH_FINDING_INTERVAL = 5000  # 5 sec
+    MOVEMENT_THRESHOLD = 200      # 200 - DEX
+
+    def determine_basic_attr(self):
+        return self.level + 5 * randint(self.level - 1, self.level + 3)
+
+    def determine_basic_exp(self):
+        return self.level * 50 + 10 * randint(0, self.level)
+
+    def path_seeking(self):
+        return
+
+
+class Goblin(Monster):
+
+    idling = True
+    wandering = False
+    seeking = False
+    attacking = False
+    fleeing = False
+
+    awake_time = 0
+    smelling_distance = 0
+    LARGEST_AWAKE_TIME = 10000      # 10 sec
+
+    def __init__(self, maze, row, col, level, player):
+        Actors.__init__(self, maze, row, col)
+        self.level = level
+        self.player = player
+        self.smelling_distance = 100 + self.level * 2
+        self.INT = self.determine_basic_attr()
+        self.STR = self.determine_basic_attr()
+        self.DEF = self.determine_basic_attr()
+        self.DEX = 5 * self.determine_basic_attr()
+        self.MAX_HP = 100 + self.level * randint(0, 100)
+        self.HP = self.MAX_HP
+        self.weapon = objects.ShortSword(0, 0, self)
+
+    def init_fsm(self):
+        self.fsm = FSM(self)
+        self.fsm.states["Idle"] = Idle(self)
+        self.fsm.states["Wander"] = Wander(self)
+        self.fsm.states["Approach"] = Approach(self, self.player)
+        self.fsm.states["Attack"] = Attack(self, self.player)
+        self.fsm.states["Flee"] = Flee(self, self.player)
+
+        self.fsm.transitions["IdleToWander"] = Transition("Wander")
+        self.fsm.transitions["WanderToIdle"] = Transition("Idle")
+        self.fsm.transitions["WanderToApproach"] = Transition("Approach")
+        self.fsm.transitions["ApproachToAttack"] = Transition("Attack")
+        self.fsm.transitions["ApproachTiIdle"] = Transition("Idle")
+        self.fsm.transitions["AttackToWander"] = Transition("Wander")
+        self.fsm.transitions["AttackToFlee"] = Transition("Flee")
+        self.fsm.transitions["FleeToWander"] = Transition("Wander")
+
+        self.fsm.set_state("Idle")
+
+    def change_state(self):
+
+        if self.idling:
+            if distance_to(self.row, self.col, self.player.row, self.player.col) < self.smelling_distance: # Add global alerting later
+                self.fsm.transition("IdleToWander")
+                self.idling = False
+                self.wandering = True
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = False
+                self.awake_time = pygame.time.get_ticks()
+
+        if self.wandering:
+            if len(self.path) < 50:     # considering alerting later.
+                self.fsm.transition("WanderToApproach")
+                self.awake_time = pygame.time.get_ticks()
+                self.idling = False
+                self.wandering = False
+                self.seeking = True
+                self.attacking = False
+                self.fleeing = False
+            if pygame.time.get_ticks() - self.awake_time > self.LARGEST_AWAKE_TIME:
+                self.fsm.transition("WanderToIdle")     # is this good? not sure
+                self.idling = True
+                self.wandering = False
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = False
+
+        if self.seeking:
+            if distance_to(self.row, self.col, self.player.row, self.player.col) < 10:
+                self.fsm.transition("ApproachToAttack")
+                self.idling = False
+                self.wandering = False
+                self.seeking = False
+                self.attacking = True
+                self.fleeing = False
+
+            if pygame.time.get_ticks() - self.awake_time > self.LARGEST_AWAKE_TIME:
+                self.fsm.transition("ApproachToIdle")
+                self.idling = True
+                self.wandering = False
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = False
+
+        if self.attacking:
+            if self.HP < self.MAX_HP / 10 and randint(0, 3) == 0:
+                self.fsm.transition("AttackToFlee")
+                self.idling = False
+                self.wandering = False
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = True
+
+        if self.fleeing:
+            if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
+                self.fsm.transition("FleeToWander")
+                self.awake_time = pygame.time.get_ticks()
+                self.idling = False
+                self.wandering = False
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = True
+
+        self.fsm.execute()
+
+
+
+

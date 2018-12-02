@@ -51,8 +51,9 @@ def equip_or_use(player, num):
             if isinstance(o, objects.RoundShield) or isinstance(o, objects.TowerShield):
                 if not isinstance(player.weapon, objects.HeavySword):
                     if isinstance(o, objects.TowerShield):
-                        player.inventory.append(player.weapon)
-                        player.weapon = None
+                        if player.weapon is not None:
+                            player.inventory.append(player.weapon)
+                            player.weapon = None
                     temp = player.shield
                     player.shield = o
                     player.inventory.remove(o)

@@ -246,6 +246,21 @@ class Maze:
         player.col = col
         self.player = player
 
+    # put the player in the map at random position
+
+    def add_player_randomly(self, player):
+
+        self.player = None
+        while True:
+            row = randint(0, self.MAX_ROW)
+            col = randint(0, self.MAX_COL)
+            if self.maze[row][col] == NULL:
+                break
+
+        player.row = row
+        player.col = col
+        self.player = player
+
     # given a row number and col number, return if it is a wall.
 
     def is_wall(self, row, col):

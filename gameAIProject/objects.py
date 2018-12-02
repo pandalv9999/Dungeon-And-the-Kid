@@ -8,7 +8,6 @@ MAX_COL = 0
 
 
 def distance_to(sr, sc, tr, tc):
-
     return math.sqrt((tr - sr) * (tr - sr) + (tc - sc) * (tc - sc))
 
 
@@ -112,10 +111,7 @@ class ScrollsOfTeleportation(Scrolls):
         return "Scroll of Teleportation"
 
     def use(self):
-        # create randpos in the map, depending on the max_col and max_row, and whether there is walls.
-        # To be implemented.
-        randpos = 0
-        self.owner.position = randpos
+        self.owner.maze.add_player_randomly(self.owner)
 
 
 class ScrollsOfResurrection(Scrolls):
