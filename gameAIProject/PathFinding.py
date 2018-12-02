@@ -34,13 +34,15 @@ class PathFinding(object):
                     if j + 1 < len(self.tmp[i]) and self.tmp[i][j + 1] != 1:
                         self.graph[self.tmp[i][j]].append(self.tmp[i][j + 1])
 
-    def setStartEnd(self, maze, startCharacter, endCharacter):
-        for i in range(len(maze)):
-            for j in range(len(maze[i])):
-                if maze[i][j] == startCharacter:  # start
-                    self.start = self.tmp[i][j]
-                elif maze[i][j] == endCharacter:  # target
-                    self.end = self.tmp[i][j]
+    def setStartEnd(self, startx, starty, endx, endy):
+        self.start = self.tmp[startx][starty]
+        self.end = self.tmp[endx][endy]
+        # for i in range(len(maze)):
+        #     for j in range(len(maze[i])):
+        #         if maze[i][j] == startCharacter:  # start
+        #             self.start = self.tmp[i][j]
+        #         elif maze[i][j] == endCharacter:  # target
+        #             self.end = self.tmp[i][j]
 
     def countDist(self, x, y):
         '''
@@ -106,6 +108,6 @@ print maze
 p = PathFinding(maze)
 print p.tmp
 print p.graph
-p.setStartEnd(maze, 2, 3)
+p.setStartEnd(2, 0, 3, 3)  # use coordinate here
 print p.aStar()
 # print PathFinding.aStar(g, cood, 0, 15)
