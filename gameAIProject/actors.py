@@ -73,16 +73,16 @@ class Approach(object):
 
 class Attack(object):
 
-    target = None
     monster = None
 
-    def __init__(self, monster, target):
-        self.target = target
+    def __init__(self, monster):
         self.monster = monster
 
     def execute(self):
-        # To be implemented
-        return
+        if self.monster.is_player_nearby():
+            self.monster.melee_attack()
+        else:
+            self.monster.path_seeking()
 
 
 class Flee(object):
@@ -270,14 +270,25 @@ class Player(Actors):
         self.HP = 500
         self.MAX_MP = 100
         self.MP = 100
-        self.DEX = 2
-        self.DEF = 2
-        self.INT = 2
-        self.STR = 2
+        self.DEX = 5
+        self.DEF = 5
+        self.INT = 5
+        self.STR = 5
         self.weapon = objects.ShortSword(0, 0, self)
 
+    def is_monster_ahead(self, direction):
+        if direction == UP and self.maze.is_monster(self.row - 1, self.col):
+            return True
+        elif direction == DOWN and self.maze.is_monster(self.row + 1, self.col):
+            return True
+        elif direction == LEFT and self.maze.is_monster(self.row, self.col - 1):
+            return True
+        elif direction == RIGHT and self.maze.is_monster(self.row, self.col + 1):
+            return True
+        return False
+
     def move(self, direction):
-        if not self.is_wall_ahead(direction):
+        if not self.is_wall_ahead(direction) and not self.is_monster_ahead(direction):
             self.unchecked_move(direction)
 
     def pick_up(self):
@@ -291,8 +302,42 @@ class Player(Actors):
             self.inventory.append(objects)
             self.maze.remove_object(objects)
 
+    def melee_attack(self):
+        monster = None
+        if self.maze.is_monster(self.row, self.col + 1):
+            monster = self.maze.monster_at(self.row, self.col + 1)
+            self.orientation = RIGHT
+        elif self.maze.is_monster(self.row, self.col - 1):
+            monster = self.maze.monster_at(self.row, self.col - 1)
+            self.orientation = LEFT
+        elif self.maze.is_monster(self.row + 1, self.col):
+            monster = self.maze.monster_at(self.row + 1, self.col)
+            self.orientation = DOWN
+        elif self.maze.is_monster(self.row - 1, self.col):
+            monster = self.maze.monster_at(self.row - 1, self.col)
+            self.orientation = UP
+
+        if monster is not None:
+            print(self.total_str())
+            print(monster.total_def())
+            damage = randint(0, self.total_str() - monster.total_def())
+            monster.HP -= damage
+            if monster.HP < 0:
+                self.EXP += monster.determine_basic_exp()
+                if self.EXP > self.get_max_exp():
+                    self.level_up()
+                    self.EXP -= self.get_max_exp()
+                monster.died()
+
     def get_max_exp(self):
         return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
+
+    def level_up(self):
+        self.MAX_HP += randint(1, 5) * 50
+        self.STR += 5 + randint(0, 5)
+        self.INT += 5 + randint(0, 5)
+        self.DEX += 5 + randint(0, 5)
+        self.DEF += 5 + randint(0, 5)
 
     def display(self):
 
@@ -364,6 +409,12 @@ class Monster(Actors):
             return True
         return False
 
+    def melee_attack(self):
+        damage = randint(0, self.total_str() - self.player.total_def())
+        self.player.HP -= damage
+        if self.player.HP < 0:
+            self.player.HP = 0
+
 
 class Goblin(Monster):
 
@@ -396,7 +447,7 @@ class Goblin(Monster):
         self.fsm.states["Idle"] = Idle(self)
         self.fsm.states["Wander"] = Wander(self)
         self.fsm.states["Approach"] = Approach(self)
-        self.fsm.states["Attack"] = Attack(self, self.player)
+        self.fsm.states["Attack"] = Attack(self)
         self.fsm.states["Flee"] = Flee(self, self.player)
 
         self.fsm.transitions["IdleToWander"] = Transition("Wander")
@@ -453,7 +504,7 @@ class Goblin(Monster):
                 self.fleeing = False
 
         if self.seeking:
-            if distance_to(self.row, self.col, self.player.row, self.player.col) < 0: # will implement later
+            if distance_to(self.row, self.col, self.player.row, self.player.col) < 5:
                 self.fsm.transition("ApproachToAttack")
                 self.idling = False
                 self.wandering = False
@@ -470,7 +521,7 @@ class Goblin(Monster):
                 self.fleeing = False
 
         if self.attacking:
-            if self.HP < self.MAX_HP / 10 and randint(0, 3) == 0:
+            if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
                 self.fsm.transition("AttackToFlee")
                 self.idling = False
                 self.wandering = False
@@ -490,6 +541,18 @@ class Goblin(Monster):
 
         self.fsm.execute()
         self.last_movement = now
+
+    def died(self):
+        dropped = None
+        odd = randint(0, 3)
+        if odd == 0:
+            dropped = objects.HitPointPotion(self.row, self.col)
+        elif odd == 1:
+            dropped = objects.MagicPointPotion(self.row, self.col)
+
+        if dropped is not None:
+            self.maze.object_list.append(dropped)
+        self.maze.monster_list.remove(self)
 
     def display(self):
         image = get_image('goblin.jpg')

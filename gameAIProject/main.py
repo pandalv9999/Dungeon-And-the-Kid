@@ -271,6 +271,22 @@ def show_status(screen, player):
         pygame.display.update()
 
 
+def death_screen(screen, player):
+
+    global PAUSE
+
+    while PAUSE:
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        screen.fill(BLACK)
+        pygame.display.update()
+
+
 if __name__ == "__main__":
 
     pygame.init()
@@ -309,6 +325,8 @@ if __name__ == "__main__":
                 player.move(DOWN)
             elif keys[pygame.K_p]:
                 player.pick_up()
+            elif keys[pygame.K_j]:
+                player.melee_attack()
             elif keys[pygame.K_i]:
                 PAUSE = True
                 show_status(screen, player)
@@ -323,6 +341,10 @@ if __name__ == "__main__":
                     continue
 
             move_time = pygame.time.get_ticks()
+
+        if player.HP <= 0:
+            PAUSE = True
+            death_screen(screen, player)
 
         for monsters in background.monster_list:
             monsters.change_state()

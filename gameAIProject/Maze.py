@@ -309,6 +309,22 @@ class Maze:
         self.object_list.remove(objects)
         self.maze[objects.row][objects.col] = NULL
 
+    # give a row number and col number, return true if it is a monster.
+
+    def is_monster(self, row, col):
+        for monsters in self.monster_list:
+            if monsters.row == row and monsters.col == col:
+                return True
+        return False
+
+    # give a row number and col number, return the monster at that position.
+
+    def monster_at(self, row, col):
+        for monsters in self.monster_list:
+            if monsters.row == row and monsters.col == col:
+                return monsters
+        return None
+
     # display the content on the map.
 
     def display(self):

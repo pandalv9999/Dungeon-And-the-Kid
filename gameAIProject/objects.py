@@ -81,7 +81,7 @@ class ScrollsOfINT(Scrolls):
 class ScrollsOfDEX(Scrolls):
 
     def __str__(self):
-        return "Scroll of STR"
+        return "Scroll of DEX"
 
     def use(self):
         self.owner.DEX += 5 + randint(0, 5)
