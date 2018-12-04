@@ -270,10 +270,10 @@ class Player(Actors):
         self.HP = 500
         self.MAX_MP = 100
         self.MP = 100
-        self.DEX = 5
-        self.DEF = 5
-        self.INT = 5
-        self.STR = 5
+        self.DEX = 10
+        self.DEF = 10
+        self.INT = 10
+        self.STR = 10
         self.weapon = objects.ShortSword(0, 0, self)
 
     def is_monster_ahead(self, direction):
@@ -320,20 +320,23 @@ class Player(Actors):
         if monster is not None:
             print(self.total_str())
             print(monster.total_def())
-            damage = randint(0, self.total_str() - monster.total_def())
+            damage = randint(0, max(self.total_str() - monster.total_def(), 0))
             monster.HP -= damage
             if monster.HP < 0:
                 self.EXP += monster.determine_basic_exp()
                 if self.EXP > self.get_max_exp():
-                    self.level_up()
                     self.EXP -= self.get_max_exp()
+                    self.level_up()
                 monster.died()
 
     def get_max_exp(self):
         return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
 
     def level_up(self):
+        self.level += 1
         self.MAX_HP += randint(1, 5) * 50
+        self.HP = self.total_max_hp()
+        self.MP = self.MAX_MP
         self.STR += 5 + randint(0, 5)
         self.INT += 5 + randint(0, 5)
         self.DEX += 5 + randint(0, 5)
@@ -410,7 +413,7 @@ class Monster(Actors):
         return False
 
     def melee_attack(self):
-        damage = randint(0, self.total_str() - self.player.total_def())
+        damage = randint(0, max(self.total_str() - self.player.total_def(), 0))
         self.player.HP -= damage
         if self.player.HP < 0:
             self.player.HP = 0

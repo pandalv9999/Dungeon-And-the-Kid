@@ -232,18 +232,22 @@ class Maze:
     def add_monsters(self):
 
         # tentative implementation. add a goblin.
-        start_room = self.room_list[0]
 
-        while True:
-            row = randint(0, self.MAX_ROW - 1)
-            col = randint(0, self.MAX_COL - 1)
-            if row not in range(start_room.top_left_rows, start_room.top_left_rows + start_room.height) \
-                    and col not in range(start_room.top_left_cols, start_room.top_left_cols + start_room.width)\
-                    and self.maze[row][col] == NULL:
-                break
+        num_monster = randint(10, 15)
+        for i in range(num_monster):
+            start_room = self.room_list[0]
 
-        monster = actors.Goblin(self, row, col, 1, self.player)
-        self.monster_list.append(monster)
+            while True:
+                row = randint(0, self.MAX_ROW - 1)
+                col = randint(0, self.MAX_COL - 1)
+                if row not in range(start_room.top_left_rows, start_room.top_left_rows + start_room.height) \
+                        and col not in range(start_room.top_left_cols, start_room.top_left_cols + start_room.width) \
+                        and self.maze[row][col] == NULL:
+                    break
+
+            if self.levels < 2:
+                monster = actors.Goblin(self, row, col, 1, self.player)
+            self.monster_list.append(monster)
 
     # put the player to the map
 

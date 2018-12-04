@@ -150,9 +150,9 @@ class HitPointPotion(Potions):
 
     def use(self):
 
-        self.owner.HP += self.owner.MAX_HP * 0.4
-        if self.owner.HP > self.owner.MAX_HP:
-            self.owner.HP = self.owner.MAX_HP
+        self.owner.HP += self.owner.total_max_hp() * 0.4
+        if self.owner.HP > self.owner.total_max_hp():
+            self.owner.HP = self.owner.total_max_hp()
 
 
 class HitPointSuperPotion(Potions):
@@ -162,7 +162,7 @@ class HitPointSuperPotion(Potions):
 
     def use(self):
 
-        self.owner.HP = self.owner.MAX_HP
+        self.owner.HP = self.owner.total_max_hp()
 
 
 class MagicPointPotion(Potions):
@@ -194,7 +194,7 @@ class Elixir(Potions):
     def use(self):
 
         self.owner.MP = self.owner.MAX_MP
-        self.owner.HP = self.owner.MAX_HP
+        self.owner.HP = self.owner.total_max_hp()
 
 
 ########################################################################

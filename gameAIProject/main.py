@@ -284,6 +284,8 @@ def death_screen(screen, player):
                 sys.exit()
 
         screen.fill(BLACK)
+        image = get_image('gameover.jpg')
+        screen.blit(image, (450, 280))
         pygame.display.update()
 
 
