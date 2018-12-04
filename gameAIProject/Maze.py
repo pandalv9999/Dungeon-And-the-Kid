@@ -1,5 +1,5 @@
 from random import randint
-from gameAIProject import objects
+from gameAIProject import objects, actors, PathFinding
 import pygame
 
 WHITE = (255, 255, 255)
@@ -38,6 +38,7 @@ class Maze:
 
     screen = None
     player = None
+    path_finding = None
     levels = 0
     object_list = []
     monster_list = []
@@ -61,7 +62,6 @@ class Maze:
         self.levels = levels
         self.init_maze()
         self.add_objects()
-        self.add_monsters()
 
     def __str__(self):
         return "The %d level of maze" % self.levels
@@ -129,6 +129,8 @@ class Maze:
         self.stair_down_row = end_room.top_left_rows + randint(3, end_room.height - 3)
         self.stair_down_col = end_room.top_left_cols + randint(3, end_room.width - 3)
         self.maze[self.stair_down_row][self.stair_down_col] = STAIR
+
+        self.path_finding = PathFinding.PathFinding(self.maze)
 
     # add objects to the map. Objects are stored in the map as numbers.
 
@@ -228,7 +230,20 @@ class Maze:
     # add monsters to the map.
 
     def add_monsters(self):
-        return
+
+        # tentative implementation. add a goblin.
+        start_room = self.room_list[0]
+
+        while True:
+            row = randint(0, self.MAX_ROW - 1)
+            col = randint(0, self.MAX_COL - 1)
+            if row not in range(start_room.top_left_rows, start_room.top_left_rows + start_room.height) \
+                    and col not in range(start_room.top_left_cols, start_room.top_left_cols + start_room.width)\
+                    and self.maze[row][col] == NULL:
+                break
+
+        monster = actors.Goblin(self, row, col, 1, self.player)
+        self.monster_list.append(monster)
 
     # put the player to the map
 
@@ -324,6 +339,8 @@ class Maze:
         # Moving characters
 
         self.player.display()
+        for monsters in self.monster_list:
+            monsters.display()
 
     # generate a path between room
 

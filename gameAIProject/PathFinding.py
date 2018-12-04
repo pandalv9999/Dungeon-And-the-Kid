@@ -102,12 +102,13 @@ class PathFinding(object):
 
 # maze will be a size of 65*40
 # Testing
-
+'''
 maze = [[2, 1, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 3]]
-print maze
+print(maze)
 p = PathFinding(maze)
-print p.tmp
-print p.graph
+print(p.tmp)
+print(p.graph)
 p.setStartEnd(2, 0, 3, 3)  # use coordinate here
-print p.aStar()
+print(p.aStar())
 # print PathFinding.aStar(g, cood, 0, 15)
+'''

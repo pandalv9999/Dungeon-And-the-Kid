@@ -281,6 +281,7 @@ if __name__ == "__main__":
     background = maze.Maze(screen, current_lvl)
     player = actors.Player(background)
     background.add_player(player)
+    background.add_monsters()
 
     move_time = 0
 
@@ -296,7 +297,7 @@ if __name__ == "__main__":
 
         # player take actions.
 
-        if pygame.time.get_ticks() - move_time > (0 - player.DEX):   # depends by DEX. 200. for test, 0
+        if pygame.time.get_ticks() - move_time > (200 - player.DEX):   # depends by DEX. 200. for test, 0
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 player.move(LEFT)
@@ -318,12 +319,17 @@ if __name__ == "__main__":
                     background = maze.Maze(screen, current_lvl)
                     player.maze = background
                     background.add_player(player)
+                    background.add_monsters()
                     continue
 
             move_time = pygame.time.get_ticks()
 
+        for monsters in background.monster_list:
+            monsters.change_state()
+
         background.display()
         pygame.display.update()
+
 
 
 
