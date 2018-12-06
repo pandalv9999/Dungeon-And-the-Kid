@@ -13,6 +13,9 @@ DOWN = 2
 LEFT = 3
 RIGHT = 4
 
+MAX_COL = 65
+MAX_ROW = 40
+
 
 IMAGE_LIBRARY = {}
 
@@ -68,7 +71,6 @@ class Approach(object):
 
     def execute(self):
         self.monster.path_seeking()
-        return
 
 
 class Attack(object):
@@ -79,10 +81,13 @@ class Attack(object):
         self.monster = monster
 
     def execute(self):
-        if self.monster.is_player_nearby():
-            self.monster.melee_attack()
-        else:
-            self.monster.path_seeking()
+        if isinstance(self.monster, Goblin):
+            if self.monster.is_player_nearby():
+                self.monster.melee_attack()
+            else:
+                self.monster.path_seeking()
+        elif isinstance(self.monster, DarkWitches):
+            self.monster.attack()
 
 
 class Flee(object):
@@ -558,7 +563,7 @@ class Goblin(Monster):
                 self.HP = self.total_max_hp()
             if len(self.path) < 30:     # considering alerting later.
                 self.fsm.transition("WanderToApproach")
-                self.awake_time = pygame.time.get_ticks()
+                self.awake_time = now
                 self.idling = False
                 self.wandering = False
                 self.seeking = True
@@ -581,8 +586,9 @@ class Goblin(Monster):
                 self.seeking = False
                 self.attacking = True
                 self.fleeing = False
+                self.awake_time = now
 
-            if pygame.time.get_ticks() - self.awake_time > self.LARGEST_AWAKE_TIME:
+            if now - self.awake_time > self.LARGEST_AWAKE_TIME:
                 self.fsm.transition("ApproachToIdle")
                 self.idling = True
                 self.wandering = False
@@ -598,6 +604,7 @@ class Goblin(Monster):
                 self.seeking = False
                 self.attacking = False
                 self.fleeing = True
+                self.awake_time = now
 
         if self.fleeing:
             if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
@@ -608,6 +615,7 @@ class Goblin(Monster):
                 self.seeking = False
                 self.attacking = False
                 self.fleeing = True
+                self.awake_time = now
 
         self.fsm.execute()
         self.last_movement = now
@@ -639,6 +647,206 @@ class Goblin(Monster):
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
         pygame.draw.rect(self.maze.screen, GREEN,
                          [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.HP / self.MAX_HP), 5])
+
+
+class DarkWitches(Monster):
+
+    idling = True
+    seeking = False
+    attacking = False
+    fleeing = False
+
+    smelling_distance = 0
+    awake_time = 0
+    LARGEST_AWAKE_TIME = 5000  # 10 sec
+    last_telescope = 0
+    TELESCOPE_INTERVAL = 3000
+
+    def __init__(self, maze, row, col, level, player):
+        Actors.__init__(self, maze, row, col)
+        self.level = level
+        self.player = player
+        self.INT = 2 * self.determine_basic_attr()
+        self.STR = self.determine_basic_attr()
+        self.DEF = 2 * self.determine_basic_attr()
+        self.DEX = 2 * self.determine_basic_attr()
+        self.MAX_HP = 80 + self.level * randint(0, 100) * 0.8
+        self.HP = self.MAX_HP
+        self.MAX_MP = 200
+        self.MP = 200
+        self.armor = objects.Robe(0, 0, self)
+        self.weapon = objects.SleepFang(0, 0, self)
+        self.init_fsm()
+
+    def init_fsm(self):
+        self.fsm = FSM(self)
+        self.fsm.states["Idle"] = Idle(self)
+        self.fsm.states["Approach"] = Approach(self)
+        self.fsm.states["Attack"] = Attack(self)
+        self.fsm.states["Flee"] = Flee(self)
+
+        self.fsm.transitions["IdleToApproach"] = Transition("Approach")
+        self.fsm.transitions["ApproachToAttack"] = Transition("Attack")
+        self.fsm.transitions["ApproachToIdle"] = Transition("Idle")
+        self.fsm.transitions["AttackToFlee"] = Transition("Flee")
+        self.fsm.transitions["FleeToIdle"] = Transition("Idle")
+
+        self.fsm.set_state("Idle")
+
+    def change_state(self):
+
+        now = pygame.time.get_ticks()
+
+        if now - self.last_movement < self.MOVEMENT_THRESHOLD - self.DEX:
+            return
+
+        self.HP += 5
+        if self.HP > self.total_max_hp():
+            self.HP = self.total_max_hp()
+
+        self.MP += 2
+        if self.MP > self.MAX_MP:
+            self.MP = self.MAX_MP
+
+        if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
+            self.maze.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            self.path = self.maze.path_finding.aStar()
+            self.current_step = 0
+            self.last_path_finding = now
+
+        if self.idling:
+
+            if (now - self.last_telescope > self.TELESCOPE_INTERVAL and self.telescope()) \
+                    or distance_to(self.row, self.col, self.player.row, self.player.col) < 15:
+                self.fsm.transition("IdleToApproach")
+                self.idling = False
+                self.seeking = True
+                self.attacking = False
+                self.fleeing = False
+                self.awake_time = now
+
+        if self.seeking:
+            if len(self.path) < 10:
+                self.fsm.transition("ApproachToAttack")
+                self.idling = False
+                self.seeking = False
+                self.attacking = True
+                self.fleeing = False
+                self.awake_time = now
+
+            if now - self.awake_time > self.LARGEST_AWAKE_TIME:
+                self.fsm.transition("ApproachToIdle")
+                self.idling = True
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = False
+
+        if self.attacking:
+            if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
+                self.fsm.transition("AttackToFlee")
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = True
+                self.awake_time = now
+
+        if self.fleeing:
+            if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
+                self.fsm.transition("FleeToWander")
+                self.awake_time = now
+                self.idling = False
+                self.seeking = False
+                self.attacking = False
+                self.fleeing = True
+                self.awake_time = now
+
+        self.fsm.execute()
+        self.last_movement = now
+
+    def telescope(self):
+        row = randint(0, MAX_ROW)
+        col = randint(0, MAX_COL)
+        return row <= self.player.row <= row + 10 and col <= self.player.col <= col + 10
+
+    def meteor(self):
+
+        generated_row = self.player.row - 3
+        generated_col = self.player.col + 3
+
+        if generated_row < 0 or generated_col > 65 or self.MP < 50:
+            return
+
+        self.MP -= 50
+        sorcery = objects.Meteorite(generated_row, generated_col, self.maze, self, self.player)
+        self.maze.bullet_list.append(sorcery)
+
+    def arcane_blast(self):
+
+        if self.MP < 10:
+            return
+        self.MP -= 10
+        sorcery = objects.Sorcery(self.row, self.col, self.orientation, self.maze, self, self.player)
+        self.maze.bullet_list.append(sorcery)
+
+    def attack(self):
+        if self.is_in_one_line():
+            if self.row < self.player.row:
+                self.orientation = DOWN
+            elif self.row > self.player.row:
+                self.orientation = UP
+            elif self.col < self.player.col:
+                self.orientation = RIGHT
+            else:
+                self.orientation = LEFT
+            self.arcane_blast()
+        elif distance_to(self.row, self.col, self.player.row, self.player.col) < 5:
+            self.flee()
+        else:
+            self.meteor()
+
+    def is_in_one_line(self):
+        if self.row == self.player.row:
+            for i in range(min(self.col, self.player.col), max(self.col, self.player.col)+1):
+                if self.maze.is_wall(self.row, i):
+                    return False
+            return True
+        elif self.col == self.player.col:
+            for i in range(min(self.row, self.player.row), max(self.row, self.player.row)+1):
+                if self.maze.is_wall(i, self.col):
+                    return False
+            return True
+        return False
+
+    def path_seeking(self):
+        if distance_to(self.row, self.col, self.player.row, self.player.col) < 10 and randint(0, 2) == 0:
+            self.meteor()
+        else:
+            Monster.path_seeking(self)
+
+    def died(self):
+        return
+
+    def display(self):
+        image = get_image('mage.jpg')
+        image = pygame.transform.flip(image, True, False)
+        if self.orientation == DOWN:
+            image = pygame.transform.rotate(image, -90)
+        elif self.orientation == UP:
+            image = pygame.transform.rotate(image, 90)
+        elif self.orientation == LEFT:
+            image = pygame.transform.flip(image, True, False)
+        self.maze.screen.blit(image, (self.col * 20, self.row * 20), [0, 0, 20, 20])
+
+        pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 14, 50, 5])
+        pygame.draw.rect(self.maze.screen, GREEN,
+                         [self.col * 20 - 15, self.row * 20 - 14, 50 * (self.HP / self.total_max_hp()), 5])
+        pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
+        pygame.draw.rect(self.maze.screen, BLUE,
+                         [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.MP / self.MAX_MP), 5])
+
+
+
+
+
 
 
 

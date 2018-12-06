@@ -235,7 +235,22 @@ class Maze:
 
         # tentative implementation. add a goblin.
 
-        num_monster = randint(10, 15)
+        start_room = self.room_list[0]
+
+        while True:
+            row = randint(0, self.MAX_ROW - 1)
+            col = randint(0, self.MAX_COL - 1)
+            if row not in range(start_room.top_left_rows, start_room.top_left_rows + start_room.height) \
+                    and col not in range(start_room.top_left_cols, start_room.top_left_cols + start_room.width) \
+                    and self.maze[row][col] == NULL:
+                break
+
+        monster = actors.DarkWitches(self, row, col, 0, self.player)
+        self.monster_list.append(monster)
+
+        '''
+
+        num_monster = 5 + randint(self.levels, 5)
         for i in range(num_monster):
             start_room = self.room_list[0]
 
@@ -252,6 +267,8 @@ class Maze:
             if self.levels <= 2:
                 monster = actors.Goblin(self, row, col, randint(self.levels + 1, self.levels + 3), self.player)
             self.monster_list.append(monster)
+            
+        '''
 
     # put the player to the map
 

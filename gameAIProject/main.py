@@ -324,6 +324,21 @@ def start_screen(screen):
         image = get_image('goblin.jpg')
         screen.blit(image, (1050, 300))
 
+        image = get_image('mage.jpg')
+        screen.blit(image, (1070, 350))
+
+        image = get_image('metero.jpg')
+        screen.blit(image, (750, 250))
+
+        image = get_image('metero.jpg')
+        screen.blit(image, (850, 270))
+
+        image = get_image('metero.jpg')
+        screen.blit(image, (830, 370))
+
+        image = get_image('metero.jpg')
+        screen.blit(image, (900, 350))
+
         text = "Press 'w', 's', 'a', 'd' to control the kid to move UP, DOWN, LEFT, RIGHT"
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, WHITE)

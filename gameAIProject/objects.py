@@ -432,8 +432,16 @@ class TowerShield(Armors):
 #   The block defines the Sorcery in the game                          #
 ########################################################################
 
+class Magic:
 
-class Sorcery:
+    def proceeds(self):
+        return
+
+    def display(self):
+        return
+
+
+class Sorcery(Magic):
 
     row = 0
     col = 0
@@ -479,7 +487,7 @@ class Sorcery:
 
         if self.defender is not None and next_row == self.defender.row and next_col == self.defender.col:
 
-            damage = 5 + randint(0, self.attacker.total_int() - self.defender.total_int())
+            damage = 10 + randint(0, self.attacker.total_int() - self.defender.total_int())
 
             #   an sorcery attack does not take the durability of defender's armor.
             self.defender.HP -= damage
@@ -510,6 +518,49 @@ class Sorcery:
         elif self.orientation == LEFT:
             image = pygame.transform.flip(image, True, False)
         self.maze.screen.blit(image, (self.col * 20, self.row * 20), [0, 0, 20, 20])
+
+
+class Meteorite(Magic):
+
+    row = 0
+    col = 0
+    maze = None
+    attacker = None
+    defender = None
+    step = 0
+
+    def __init__(self, row, col, maze, attacker, defender):
+
+        self.row = row
+        self.col = col
+        self.maze = maze
+        self.attacker = attacker
+        self.defender = defender
+        self.step = 3
+
+    def proceeds(self):
+
+        self.row += 1
+        self.col -= 1
+        self.step -= 1
+
+        if self.step == 0 or self.row == self.defender.row and self.col == self.defender.col:
+            if self.row - 1 <= self.defender.row <= self.row + 1 and self.col - 1 <= self.defender.col <= self.col + 1:
+                damage = 50 + 5 * randint(0, self.attacker.total_int() - self.defender.total_int())
+                self.defender.HP -= damage
+                if self.defender.HP <= 0:
+                    self.defender.HP = 0
+
+            self.maze.bullet_list.remove(self)
+            del self
+
+    def display(self):
+        image = get_image('metero.jpg')
+        self.maze.screen.blit(image, (self.col * 20, self.row * 20), [0, 0, 20, 20])
+
+
+
+
 
 
 
