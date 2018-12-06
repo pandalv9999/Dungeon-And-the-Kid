@@ -43,6 +43,7 @@ class Maze:
     object_list = []
     monster_list = []
     room_list = []
+    bullet_list = []
     maze = []
     size = [1300, 800]
     MAX_COL = 65
@@ -55,6 +56,7 @@ class Maze:
         self.maze = []
         self.object_list = []
         self.monster_list = []
+        self.bullet_list = []
         self.room_list = []
         self.player = None
         self.screen = None
@@ -245,8 +247,10 @@ class Maze:
                         and self.maze[row][col] == NULL:
                     break
 
-            if self.levels < 2:
-                monster = actors.Goblin(self, row, col, 1, self.player)
+            #   right now only have goblins
+
+            if self.levels <= 2:
+                monster = actors.Goblin(self, row, col, randint(self.levels + 1, self.levels + 3), self.player)
             self.monster_list.append(monster)
 
     # put the player to the map
@@ -359,6 +363,8 @@ class Maze:
         # Moving characters
 
         self.player.display()
+        for bullet in self.bullet_list:
+            bullet.display()
         for monsters in self.monster_list:
             monsters.display()
 

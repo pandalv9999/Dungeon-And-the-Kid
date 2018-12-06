@@ -87,17 +87,13 @@ class Attack(object):
 
 class Flee(object):
 
-    target = None
     monster = None
 
-    def __init__(self, monster, target):
-
-        self.target = target
+    def __init__(self, monster):
         self.monster = monster
 
     def execute(self):
-        # To be implemented
-        return
+        self.monster.flee()
 
 
 class Transition(object):
@@ -275,6 +271,7 @@ class Player(Actors):
         self.INT = 10
         self.STR = 10
         self.weapon = objects.ShortSword(0, 0, self)
+        # self.weapon = objects.FireStaff(0, 0, self)
 
     def is_monster_ahead(self, direction):
         if direction == UP and self.maze.is_monster(self.row - 1, self.col):
@@ -318,16 +315,38 @@ class Player(Actors):
             self.orientation = UP
 
         if monster is not None:
-            print(self.total_str())
-            print(monster.total_def())
-            damage = randint(0, max(self.total_str() - monster.total_def(), 0))
+            damage = 5 + randint(0, max(self.total_str() - monster.total_def(), 0))
             monster.HP -= damage
+            if randint(0, 3) == 3 and self.weapon is not None:
+                self.weapon.durability -= 1
+                if self.weapon.durability <= 0:
+                    self.weapon = None
+            if randint(0, 3) == 3 and monster.armor is not None:
+                monster.armor.durability -= 1
+                if monster.armor.durability <= 0:
+                    monster.armor = None
+            if randint(0, 3) == 3 and monster.shield is not None:
+                monster.shield.durability -= 1
+                if monster.shield.durability <= 0:
+                    monster.shield = None
             if monster.HP < 0:
                 self.EXP += monster.determine_basic_exp()
                 if self.EXP > self.get_max_exp():
                     self.EXP -= self.get_max_exp()
                     self.level_up()
                 monster.died()
+
+    def sorcery_attack(self):
+        if not isinstance(self.weapon, objects.SorceryWeapons) or self.MP < 10:
+            return
+
+        self.MP -= 10
+        sorcery = objects.Sorcery(self.row, self.col, self.orientation, self.maze, self)
+        self.maze.bullet_list.append(sorcery)
+        if randint(0, 3) == 0:
+            self.weapon.durability -= 1
+            if self.weapon.durability <= 0:
+                self.weapon = None
 
     def get_max_exp(self):
         return self.level * 100 + (self.level - 1) * (self.level - 1) * 10
@@ -355,7 +374,7 @@ class Player(Actors):
 
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 14, 50, 5])
         pygame.draw.rect(self.maze.screen, GREEN,
-                         [self.col * 20 - 15, self.row * 20 - 14, 50 * (self.HP / self.MAX_HP), 5])
+                         [self.col * 20 - 15, self.row * 20 - 14, 50 * (self.HP / self.total_max_hp()), 5])
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
         pygame.draw.rect(self.maze.screen, BLUE,
                          [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.MP / self.MAX_MP), 5])
@@ -374,6 +393,7 @@ class Monster(Actors):
     last_path_finding = 0
     last_movement = 0
     path = []
+    flee_path = []
     current_step = 0
     PATH_FINDING_INTERVAL = 3000  # 5 sec
     MOVEMENT_THRESHOLD = 200      # 200 - DEX
@@ -413,10 +433,51 @@ class Monster(Actors):
         return False
 
     def melee_attack(self):
-        damage = randint(0, max(self.total_str() - self.player.total_def(), 0))
+        damage = 5 + randint(0, max(self.total_str() - self.player.total_def(), 0))
         self.player.HP -= damage
+        if randint(0, 3) == 3 and self.weapon is not None:
+            self.weapon.durability -= 1
+            if self.weapon.durability <= 0:
+                self.weapon = None
+        if randint(0, 3) == 3 and self.player.armor is not None:
+            self.player.armor.durability -= 1
+            if self.player.armor.durability <= 0:
+                self.player.armor = None
+        if randint(0, 3) == 3 and self.player.shield is not None:
+            self.player.shield.durability -= 1
+            if self.player.shield.durability <= 0:
+                self.player.shield = None
         if self.player.HP < 0:
             self.player.HP = 0
+
+    def died(self):
+        return
+
+    def flee(self):
+
+        if len(self.flee_path) <= 0:
+            end_room = self.maze.room_list[-1]
+            row = end_room.top_left_rows + randint(3, end_room.height - 3)
+            col = end_room.top_left_cols + randint(3, end_room.width - 3)
+            self.maze.path_finding.setStartEnd(self.row, self.col, row, col)
+            self.flee_path = self.maze.path_finding.aStar()
+            self.current_step = 0
+
+        if self.current_step >= len(self.flee_path):
+            return
+
+        next_move = self.flee_path[self.current_step]
+        next_move_row = next_move[0]
+        next_move_col = next_move[1]
+        if next_move_row == self.row and next_move_col == self.col + 1:
+            self.unchecked_move(RIGHT)
+        elif next_move_row == self.row and next_move_col == self.col - 1:
+            self.unchecked_move(LEFT)
+        elif next_move_col == self.col and next_move_row == self.row + 1:
+            self.unchecked_move(DOWN)
+        elif next_move_col == self.col and next_move_row == self.row - 1:
+            self.unchecked_move(UP)
+        self.current_step += 1
 
 
 class Goblin(Monster):
@@ -451,7 +512,7 @@ class Goblin(Monster):
         self.fsm.states["Wander"] = Wander(self)
         self.fsm.states["Approach"] = Approach(self)
         self.fsm.states["Attack"] = Attack(self)
-        self.fsm.states["Flee"] = Flee(self, self.player)
+        self.fsm.states["Flee"] = Flee(self)
 
         self.fsm.transitions["IdleToWander"] = Transition("Wander")
         self.fsm.transitions["WanderToIdle"] = Transition("Idle")
@@ -478,6 +539,9 @@ class Goblin(Monster):
             self.last_path_finding = now
 
         if self.idling:
+            self.HP += 2
+            if self.HP > self.total_max_hp():
+                self.HP = self.total_max_hp()
             if distance_to(self.row, self.col, self.player.row, self.player.col) < self.smelling_distance:
                 # Add global alerting later
                 self.fsm.transition("IdleToWander")
@@ -489,6 +553,9 @@ class Goblin(Monster):
                 self.awake_time = now
 
         if self.wandering:
+            self.HP += 2
+            if self.HP > self.total_max_hp():
+                self.HP = self.total_max_hp()
             if len(self.path) < 30:     # considering alerting later.
                 self.fsm.transition("WanderToApproach")
                 self.awake_time = pygame.time.get_ticks()
@@ -555,6 +622,7 @@ class Goblin(Monster):
 
         if dropped is not None:
             self.maze.object_list.append(dropped)
+            self.maze.maze[self.row][self.col] = 8
         self.maze.monster_list.remove(self)
 
     def display(self):

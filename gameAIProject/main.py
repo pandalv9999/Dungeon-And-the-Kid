@@ -276,9 +276,7 @@ def death_screen(screen, player):
     global PAUSE
 
     while PAUSE:
-
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -286,6 +284,71 @@ def death_screen(screen, player):
         screen.fill(BLACK)
         image = get_image('gameover.jpg')
         screen.blit(image, (450, 280))
+        pygame.display.update()
+
+
+def start_screen(screen):
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN] or keys[pygame.K_s]:
+            return
+
+        screen.fill(BLACK)
+
+        text = "Dungeon And the Kid"
+        font = pygame.font.Font("ancient.ttf", 100)
+        text = font.render(text, True, RED)
+        screen.blit(text, (270, 100))
+
+        image = get_image('kid.jpg')
+        screen.blit(image, (270, 300))
+
+        image = get_image('sorcery.jpg')
+        screen.blit(image, (400, 300))
+
+        image = get_image('sorcery.jpg')
+        screen.blit(image, (560, 300))
+
+        image = get_image('sorcery.jpg')
+        screen.blit(image, (690, 350))
+
+        image = get_image('sorcery.jpg')
+        screen.blit(image, (810, 300))
+
+        image = get_image('goblin.jpg')
+        screen.blit(image, (1050, 300))
+
+        text = "Press 'w', 's', 'a', 'd' to control the kid to move UP, DOWN, LEFT, RIGHT"
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, WHITE)
+        screen.blit(text, (120, 600))
+
+        text = "Press 'j' to melee attack. Press 'k' to range attack. (Only valid when ranged weapon is equipped.)"
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, WHITE)
+        screen.blit(text, (120, 630))
+
+        text = "Press 'i' to get Status. Press 'p' to pick up weapons."
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, WHITE)
+        screen.blit(text, (120, 660))
+
+        text = "When standing on stairs, press 'n' to go to the next levels."
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, WHITE)
+        screen.blit(text, (120, 690))
+
+        text = "Press 'ENTER' or 's' to start game. Good Luck!~"
+        font = pygame.font.SysFont("times", 30)
+        text = font.render(text, True, WHITE)
+        screen.blit(text, (120, 720))
+
         pygame.display.update()
 
 
@@ -300,6 +363,7 @@ if __name__ == "__main__":
     player = actors.Player(background)
     background.add_player(player)
     background.add_monsters()
+    start_screen(screen)
 
     move_time = 0
 
@@ -329,6 +393,8 @@ if __name__ == "__main__":
                 player.pick_up()
             elif keys[pygame.K_j]:
                 player.melee_attack()
+            elif keys[pygame.K_k]:
+                player.sorcery_attack()
             elif keys[pygame.K_i]:
                 PAUSE = True
                 show_status(screen, player)
@@ -341,7 +407,12 @@ if __name__ == "__main__":
                     background.add_player(player)
                     background.add_monsters()
                     continue
-
+            player.MP += 2
+            player.HP += 5
+            if player.HP >= player.total_max_hp():
+                player.HP = player.total_max_hp()
+            if player.MP >= player.MAX_MP:
+                player.MP = player.MAX_MP
             move_time = pygame.time.get_ticks()
 
         if player.HP <= 0:
@@ -350,6 +421,9 @@ if __name__ == "__main__":
 
         for monsters in background.monster_list:
             monsters.change_state()
+
+        for bullet in background.bullet_list:
+            bullet.proceeds()
 
         background.display()
         pygame.display.update()

@@ -1,15 +1,28 @@
 from random import randint
-import math
+import pygame
+from gameAIProject import actors
 
 # The global parameters of the screen
 
 MAX_ROW = 0
 MAX_COL = 0
 
+UP = 1
+DOWN = 2
+LEFT = 3
+RIGHT = 4
 
-def distance_to(sr, sc, tr, tc):
-    return math.sqrt((tr - sr) * (tr - sr) + (tc - sc) * (tc - sc))
 
+IMAGE_LIBRARY = {}
+
+
+def get_image(path):
+    global IMAGE_LIBRARY
+    image = IMAGE_LIBRARY.get(path)
+    if image is None:
+        image = pygame.image.load(path)
+        IMAGE_LIBRARY[path] = image
+    return image
 
 ########################################################################
 #   The file of code defines the objects that would appeared in game.  #
@@ -415,8 +428,88 @@ class TowerShield(Armors):
         self.durability = 200
 
 
+########################################################################
+#   The block defines the Sorcery in the game                          #
+########################################################################
 
 
+class Sorcery:
+
+    row = 0
+    col = 0
+    orientation = 0
+    maze = None
+    attacker = None
+    defender = None
+    step = 0
+
+    def __init__(self, row, col, orientation, maze, attacker, defender=None):
+        self.row = row
+        self.col = col
+        self.orientation = orientation
+        self.maze = maze
+        self.attacker = attacker
+        self.defender = defender
+        self.step = 10 + int(self.attacker.total_int() / 10)
+
+    def proceeds(self):     # implement sleep later.
+        next_row = 0
+        next_col = 0
+        if self.orientation == UP:
+            next_col = self.col
+            next_row = self.row - 1
+        elif self.orientation == DOWN:
+            next_col = self.col
+            next_row = self.row + 1
+        elif self.orientation == LEFT:
+            next_col = self.col - 1
+            next_row = self.row
+        elif self.orientation == RIGHT:
+            next_col = self.col + 1
+            next_row = self.row
+
+        if self.maze.is_wall(next_row, next_col) or self.step <= 0:
+            self.maze.bullet_list.remove(self)
+            del self
+            return
+
+        if self.defender is None:
+            if self.maze.is_monster(next_row, next_col):
+                self.defender = self.maze.monster_at(next_row, next_col)
+
+        if self.defender is not None and next_row == self.defender.row and next_col == self.defender.col:
+
+            damage = 5 + randint(0, self.attacker.total_int() - self.defender.total_int())
+
+            #   an sorcery attack does not take the durability of defender's armor.
+            self.defender.HP -= damage
+            if self.defender.HP <= 0:
+
+                self.defender.HP = 0
+                if isinstance(self.defender, actors.Monster):
+                    self.attacker.EXP += self.defender.determine_basic_exp()
+                    if self.attacker.EXP > self.attacker.get_max_exp():
+                        self.attacker.EXP -= self.attacker.get_max_exp()
+                        self.attacker.level_up()
+                    self.defender.died()
+
+            self.maze.bullet_list.remove(self)
+            del self
+            return
+
+        self.row = next_row
+        self.col = next_col
+        self.step -= 1
+
+    def display(self):
+        image = get_image('sorcery.jpg')
+        if self.orientation == DOWN:
+            image = pygame.transform.rotate(image, -90)
+        elif self.orientation == UP:
+            image = pygame.transform.rotate(image, 90)
+        elif self.orientation == LEFT:
+            image = pygame.transform.flip(image, True, False)
+        self.maze.screen.blit(image, (self.col * 20, self.row * 20), [0, 0, 20, 20])
 
 
 
