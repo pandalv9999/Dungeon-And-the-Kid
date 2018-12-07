@@ -115,7 +115,7 @@ class ScrollsOfMP(Scrolls):
         return "Scroll of MP"
 
     def use(self):
-        self.owner.MAX_MP += 500 + 100 * randint(0, 5)
+        self.owner.MAX_MP += 20 + 2 * randint(0, 5)
 
 
 class ScrollsOfTeleportation(Scrolls):
@@ -487,7 +487,7 @@ class Sorcery(Magic):
 
         if self.defender is not None and next_row == self.defender.row and next_col == self.defender.col:
 
-            damage = 10 + randint(0, self.attacker.total_int() - self.defender.total_int())
+            damage = 10 + randint(0, max(0, self.attacker.total_int() - self.defender.total_int()))
 
             #   an sorcery attack does not take the durability of defender's armor.
             self.defender.HP -= damage
@@ -546,7 +546,7 @@ class Meteorite(Magic):
 
         if self.step == 0 or self.row == self.defender.row and self.col == self.defender.col:
             if self.row - 1 <= self.defender.row <= self.row + 1 and self.col - 1 <= self.defender.col <= self.col + 1:
-                damage = 50 + 5 * randint(0, self.attacker.total_int() - self.defender.total_int())
+                damage = 50 + 5 * randint(0, max(0, self.attacker.total_int() - self.defender.total_int()))
                 self.defender.HP -= damage
                 if self.defender.HP <= 0:
                     self.defender.HP = 0

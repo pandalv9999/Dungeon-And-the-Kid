@@ -611,10 +611,10 @@ class Goblin(Monster):
                 self.fsm.transition("FleeToWander")
                 self.awake_time = now
                 self.idling = False
-                self.wandering = False
+                self.wandering = True
                 self.seeking = False
                 self.attacking = False
-                self.fleeing = True
+                self.fleeing = False
                 self.awake_time = now
 
         self.fsm.execute()
@@ -751,12 +751,12 @@ class DarkWitches(Monster):
 
         if self.fleeing:
             if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
-                self.fsm.transition("FleeToWander")
+                self.fsm.transition("FleeToIdle")
                 self.awake_time = now
-                self.idling = False
+                self.idling = True
                 self.seeking = False
                 self.attacking = False
-                self.fleeing = True
+                self.fleeing = False
                 self.awake_time = now
 
         self.fsm.execute()
@@ -823,7 +823,19 @@ class DarkWitches(Monster):
             Monster.path_seeking(self)
 
     def died(self):
-        return
+
+        # Considered Modified.
+        dropped = None
+        odd = randint(0, 3)
+        if odd == 0:
+            dropped = objects.HitPointPotion(self.row, self.col)
+        elif odd == 1:
+            dropped = objects.MagicPointPotion(self.row, self.col)
+
+        if dropped is not None:
+            self.maze.object_list.append(dropped)
+            self.maze.maze[self.row][self.col] = 8
+        self.maze.monster_list.remove(self)
 
     def display(self):
         image = get_image('mage.jpg')
@@ -842,6 +854,12 @@ class DarkWitches(Monster):
         pygame.draw.rect(self.maze.screen, RED, [self.col * 20 - 15, self.row * 20 - 9, 50, 5])
         pygame.draw.rect(self.maze.screen, BLUE,
                          [self.col * 20 - 15, self.row * 20 - 9, 50 * (self.MP / self.MAX_MP), 5])
+
+
+class SkullKnight(Monster):
+    
+    def display(self):
+        return
 
 
 

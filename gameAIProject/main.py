@@ -110,7 +110,7 @@ def show_status(screen, player):
         health = font.render(health, True, WHITE)
         screen.blit(health, (120, 180))
         pygame.draw.rect(screen, RED, [320, 180, 300, 20])
-        pygame.draw.rect(screen, GREEN, [320, 180, 300 * (player.HP / player.MAX_HP), 20])
+        pygame.draw.rect(screen, GREEN, [320, 180, 300 * (player.HP / player.total_max_hp()), 20])
 
         magic = "MP: " + str(player.MP) + "/" + str(player.MAX_MP)
         font = pygame.font.SysFont("times", 30)
