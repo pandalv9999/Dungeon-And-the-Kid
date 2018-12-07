@@ -543,6 +543,8 @@ class Goblin(Monster):
 
     def change_state(self):
 
+        print(self.path)
+
         now = pygame.time.get_ticks()
 
         if now - self.last_movement < self.MOVEMENT_THRESHOLD - self.DEX:
