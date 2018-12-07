@@ -1,4 +1,4 @@
-from gameAIProject import objects
+from gameAIProject import objects, PathFinding
 import pygame
 import math
 from random import randint
@@ -366,6 +366,14 @@ class Player(Actors):
         self.DEX += 5 + randint(0, 5)
         self.DEF += 5 + randint(0, 5)
 
+    def cheat(self):
+        self.STR = 999
+        self.INT = 999
+        self.DEX = 999
+        self.DEF = 999
+        self.MAX_HP = 99999
+        self.MAX_MP = 999
+
     def display(self):
 
         image = get_image('kid.jpg')
@@ -402,6 +410,7 @@ class Monster(Actors):
     current_step = 0
     PATH_FINDING_INTERVAL = 3000  # 5 sec
     MOVEMENT_THRESHOLD = 200      # 200 - DEX
+    path_finding = None
 
     def determine_basic_attr(self):
         return self.level + 5 * randint(self.level - 1, self.level + 3)
@@ -412,8 +421,8 @@ class Monster(Actors):
     def path_seeking(self):
 
         if self.current_step >= len(self.path):
-            self.maze.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.maze.path_finding.aStar()
+            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            self.path = self.path_finding.aStar()
             self.current_step = 0
             self.last_path_finding = pygame.time.get_ticks()
 
@@ -464,8 +473,8 @@ class Monster(Actors):
             end_room = self.maze.room_list[-1]
             row = end_room.top_left_rows + randint(3, end_room.height - 3)
             col = end_room.top_left_cols + randint(3, end_room.width - 3)
-            self.maze.path_finding.setStartEnd(self.row, self.col, row, col)
-            self.flee_path = self.maze.path_finding.aStar()
+            self.path_finding.setStartEnd(self.row, self.col, row, col)
+            self.flee_path = self.path_finding.aStar()
             self.current_step = 0
 
         if self.current_step >= len(self.flee_path):
@@ -510,6 +519,8 @@ class Goblin(Monster):
         self.HP = self.MAX_HP
         self.weapon = objects.ShortSword(0, 0, self)
         self.init_fsm()
+        self.path_finding = None
+        self.path_finding = PathFinding.PathFinding(self.maze.maze)
 
     def init_fsm(self):
         self.fsm = FSM(self)
@@ -538,8 +549,8 @@ class Goblin(Monster):
             return
 
         if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            self.maze.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.maze.path_finding.aStar()
+            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            self.path = self.path_finding.aStar()
             self.current_step = 0
             self.last_path_finding = now
 
@@ -676,6 +687,8 @@ class DarkWitches(Monster):
         self.MP = 200
         self.armor = objects.Robe(0, 0, self)
         self.weapon = objects.SleepFang(0, 0, self)
+        self.path_finding = None
+        self.path_finding = PathFinding.PathFinding(self.maze.maze)
         self.init_fsm()
 
     def init_fsm(self):
@@ -709,8 +722,8 @@ class DarkWitches(Monster):
             self.MP = self.MAX_MP
 
         if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            self.maze.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.maze.path_finding.aStar()
+            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            self.path = self.path_finding.aStar()
             self.current_step = 0
             self.last_path_finding = now
 
@@ -818,6 +831,8 @@ class DarkWitches(Monster):
 
     def path_seeking(self):
         if distance_to(self.row, self.col, self.player.row, self.player.col) < 10 and randint(0, 2) == 0:
+            print(distance_to(self.row, self.col, self.player.row, self.player.col))
+            print(self.row, self.col, self.player.row, self.player.col)
             self.meteor()
         else:
             Monster.path_seeking(self)
@@ -857,7 +872,7 @@ class DarkWitches(Monster):
 
 
 class SkullKnight(Monster):
-    
+
     def display(self):
         return
 

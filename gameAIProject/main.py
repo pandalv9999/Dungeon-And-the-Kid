@@ -410,6 +410,8 @@ if __name__ == "__main__":
                 player.melee_attack()
             elif keys[pygame.K_k]:
                 player.sorcery_attack()
+            elif keys[pygame.K_1]:
+                player.cheat()
             elif keys[pygame.K_i]:
                 PAUSE = True
                 show_status(screen, player)
