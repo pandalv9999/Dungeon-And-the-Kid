@@ -421,8 +421,9 @@ class Monster(Actors):
     def path_seeking(self):
 
         if self.current_step >= len(self.path):
-            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.path_finding.aStar()
+            # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            # self.path = self.path_finding.aStar()
+            self.path = self.path_finding.dijkstra(self.row, self.col, self.player.row, self.player.col)
             self.current_step = 0
             self.last_path_finding = pygame.time.get_ticks()
 
@@ -473,8 +474,9 @@ class Monster(Actors):
             end_room = self.maze.room_list[-1]
             row = end_room.top_left_rows + randint(3, end_room.height - 3)
             col = end_room.top_left_cols + randint(3, end_room.width - 3)
-            self.path_finding.setStartEnd(self.row, self.col, row, col)
-            self.flee_path = self.path_finding.aStar()
+            # self.path_finding.setStartEnd(self.row, self.col, row, col)
+            # self.flee_path = self.path_finding.aStar()
+            self.flee_path = self.path_finding.dijkstra(self.row, self.col, row, col)
             self.current_step = 0
 
         if self.current_step >= len(self.flee_path):
@@ -543,7 +545,8 @@ class Goblin(Monster):
 
     def change_state(self):
 
-        print(self.path)
+        print(self.row, self.col)
+        print(self.maze.maze)
 
         now = pygame.time.get_ticks()
 
@@ -551,8 +554,9 @@ class Goblin(Monster):
             return
 
         if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.path_finding.aStar()
+            # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            # self.path = self.path_finding.aStar()
+            self.path = self.path_finding.dijkstra(self.row, self.col, self.player.row, self.player.col)
             self.current_step = 0
             self.last_path_finding = now
 
@@ -724,8 +728,9 @@ class DarkWitches(Monster):
             self.MP = self.MAX_MP
 
         if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            self.path = self.path_finding.aStar()
+            # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+            # self.path = self.path_finding.aStar()
+            self.path = self.path_finding.dijkstra(self.row, self.col, self.player.row, self.player.col)
             self.current_step = 0
             self.last_path_finding = now
 
