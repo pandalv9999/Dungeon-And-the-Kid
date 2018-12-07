@@ -99,16 +99,41 @@ class PathFinding(object):
             path[i] = self.nodeToCoordinate(path[i])
         return path
 
+    def dijkstra(self, startx, starty, endx, endy):
+        f = self.coordinateToNode(startx, starty)
+        t = self.coordinateToNode(endx, endy)
+        q, seen, mins = [(0, f, [])], set(), {f: 0}
+        while q:
+            (cost, v1, path) = heapq.heappop(q)
+            if v1 not in seen:
+                seen.add(v1)
+                path = path + [v1]
+                if v1 == t:
+                    for i in range(len(path)):
+                        path[i] = self.nodeToCoordinate(path[i])
+                    return path
+
+                for v2 in self.graph[v1]:
+                    if v2 in seen:
+                        continue
+                    prev = mins.get(v2, None)
+                    next = cost + 1
+                    if prev is None or next < prev:
+                        mins[v2] = next
+                        heapq.heappush(q, (next, v2, path))
+
+        return float("inf")
+
 
 # maze will be a size of 65*40
 # Testing
-'''
+
 maze = [[2, 1, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 3]]
 print(maze)
 p = PathFinding(maze)
 print(p.tmp)
 print(p.graph)
+print p.dijkstra(2, 0, 3, 3)
 p.setStartEnd(2, 0, 3, 3)  # use coordinate here
 print(p.aStar())
 # print PathFinding.aStar(g, cood, 0, 15)
-'''
