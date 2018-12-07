@@ -29,13 +29,13 @@ def get_image(path):
         IMAGE_LIBRARY[path] = image
     return image
 
+
 ########################################################################
 #   The file of code defines the The maze of the game                  #
 ########################################################################
 
 
 class Maze:
-
     screen = None
     player = None
     path_finding = None
@@ -120,7 +120,7 @@ class Maze:
 
         for i in range(len(self.room_list) - 1):
             room_1 = self.room_list[i]
-            room_2 = self.room_list[i+1]
+            room_2 = self.room_list[i + 1]
 
             if not room_1.connected or not room_2.connected:
                 self.generate_path(room_1, room_2)
@@ -132,7 +132,7 @@ class Maze:
         self.stair_down_col = end_room.top_left_cols + randint(3, end_room.width - 3)
         self.maze[self.stair_down_row][self.stair_down_col] = STAIR
 
-        self.path_finding = PathFinding.PathFinding(self.maze)
+        self.path_finding = PathFinding(self.maze)
 
     # add objects to the map. Objects are stored in the map as numbers.
 
@@ -166,7 +166,7 @@ class Maze:
 
                 self.maze[rows][cols] = POTION
 
-            elif types == 3:    # scrolls
+            elif types == 3:  # scrolls
 
                 subtypes = randint(0, 7)
                 if subtypes == 0:
@@ -188,7 +188,7 @@ class Maze:
 
                 self.maze[rows][cols] = SCROLLS
 
-            elif types == 4:    # weapon
+            elif types == 4:  # weapon
 
                 subtypes = randint(0, 9)
                 if subtypes == 0:
@@ -212,7 +212,7 @@ class Maze:
 
                 self.maze[rows][cols] = WEAPONS
 
-            else:   # armor
+            else:  # armor
                 subtypes = randint(0, 9)
                 if subtypes in range(0, 3):
                     new_object = objects.Robe(rows, cols)
@@ -423,7 +423,6 @@ class Maze:
 
 
 class Room:
-
     top_left_rows = 0
     top_left_cols = 0
     width = 0
@@ -435,7 +434,3 @@ class Room:
         self.height = height
         self.top_left_rows = rows
         self.top_left_cols = cols
-
-
-
-
