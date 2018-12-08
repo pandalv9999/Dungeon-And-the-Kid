@@ -295,10 +295,10 @@ level_1 = [
 
 # maze = [[2, 1, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 3]]
 # print(maze)
-p = PathFinding(level_1)
-print p.aStar(1, 52, 11, 6)
-p = PathFinding(level_2)
-print p.aStar(4, 52, 11, 18)
+# p = PathFinding(level_1)
+# print p.aStar(1, 52, 11, 6)
+# p = PathFinding(level_2)
+# print p.aStar(4, 52, 11, 18)
 # print(p.tmp)
 # print(p.graph)
 # print p.dijkstra(2, 0, 3, 3)

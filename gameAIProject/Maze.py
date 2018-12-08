@@ -232,7 +232,7 @@ class Maze:
 
         # tentative implementation. add a goblin.
 
-        num_monster = 1#5 + randint(self.levels, 5)
+        num_monster = 5 + randint(self.levels, 5)
         for i in range(num_monster):
             start_room = self.room_list[0]
 
