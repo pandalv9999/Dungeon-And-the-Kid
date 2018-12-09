@@ -781,7 +781,7 @@ class DarkWitches(Monster):
 
             self.fsm.execute()
             self.last_movement = now
-        
+
     def telescope(self):
         if self.MP < 5:
             return False
