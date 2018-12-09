@@ -547,92 +547,91 @@ class Goblin(Monster):
 
         now = pygame.time.get_ticks()
 
-        if now - self.last_movement < self.MOVEMENT_THRESHOLD - self.DEX:
-            return
+        if now - self.last_movement > self.MOVEMENT_THRESHOLD - self.DEX:
 
-        if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            # self.path = self.path_finding.aStar()
-            self.path = self.path_finding.aStar(self.row, self.col, self.player.row, self.player.col)
-            self.current_step = 0
-            self.last_path_finding = now
+            if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
+                # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+                # self.path = self.path_finding.aStar()
+                self.path = self.path_finding.aStar(self.row, self.col, self.player.row, self.player.col)
+                self.current_step = 0
+                self.last_path_finding = now
 
-        if self.idling:
-            self.HP += 2
-            if self.HP > self.total_max_hp():
-                self.HP = self.total_max_hp()
-            if distance_to(self.row, self.col, self.player.row, self.player.col) < self.smelling_distance:
-                # Add global alerting later
-                self.fsm.transition("IdleToWander")
-                self.idling = False
-                self.wandering = True
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
-                self.awake_time = now
+            if self.idling:
+                self.HP += 2
+                if self.HP > self.total_max_hp():
+                    self.HP = self.total_max_hp()
+                if distance_to(self.row, self.col, self.player.row, self.player.col) < self.smelling_distance:
+                    # Add global alerting later
+                    self.fsm.transition("IdleToWander")
+                    self.idling = False
+                    self.wandering = True
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
+                    self.awake_time = now
 
-        if self.wandering:
-            self.HP += 2
-            if self.HP > self.total_max_hp():
-                self.HP = self.total_max_hp()
-            if len(self.path) < 30:     # considering alerting later.
-                self.fsm.transition("WanderToApproach")
-                self.awake_time = now
-                self.idling = False
-                self.wandering = False
-                self.seeking = True
-                self.attacking = False
-                self.fleeing = False
+            if self.wandering:
+                self.HP += 2
+                if self.HP > self.total_max_hp():
+                    self.HP = self.total_max_hp()
+                if len(self.path) < 30:  # considering alerting later.
+                    self.fsm.transition("WanderToApproach")
+                    self.awake_time = now
+                    self.idling = False
+                    self.wandering = False
+                    self.seeking = True
+                    self.attacking = False
+                    self.fleeing = False
 
-            if now - self.awake_time > self.LARGEST_AWAKE_TIME:
-                self.fsm.transition("WanderToIdle")     # is this good? not sure
-                self.idling = True
-                self.wandering = False
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
+                if now - self.awake_time > self.LARGEST_AWAKE_TIME:
+                    self.fsm.transition("WanderToIdle")  # is this good? not sure
+                    self.idling = True
+                    self.wandering = False
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
 
-        if self.seeking:
-            if distance_to(self.row, self.col, self.player.row, self.player.col) < 5:
-                self.fsm.transition("ApproachToAttack")
-                self.idling = False
-                self.wandering = False
-                self.seeking = False
-                self.attacking = True
-                self.fleeing = False
-                self.awake_time = now
+            if self.seeking:
+                if distance_to(self.row, self.col, self.player.row, self.player.col) < 5:
+                    self.fsm.transition("ApproachToAttack")
+                    self.idling = False
+                    self.wandering = False
+                    self.seeking = False
+                    self.attacking = True
+                    self.fleeing = False
+                    self.awake_time = now
 
-            if now - self.awake_time > self.LARGEST_AWAKE_TIME:
-                self.fsm.transition("ApproachToIdle")
-                self.idling = True
-                self.wandering = False
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
+                if now - self.awake_time > self.LARGEST_AWAKE_TIME:
+                    self.fsm.transition("ApproachToIdle")
+                    self.idling = True
+                    self.wandering = False
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
 
-        if self.attacking:
-            if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
-                self.fsm.transition("AttackToFlee")
-                self.idling = False
-                self.wandering = False
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = True
-                self.awake_time = now
+            if self.attacking:
+                if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
+                    self.fsm.transition("AttackToFlee")
+                    self.idling = False
+                    self.wandering = False
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = True
+                    self.awake_time = now
 
-        if self.fleeing:
-            if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
-                self.fsm.transition("FleeToWander")
-                self.awake_time = now
-                self.idling = False
-                self.wandering = True
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
-                self.awake_time = now
+            if self.fleeing:
+                if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:  # consider revise
+                    self.fsm.transition("FleeToWander")
+                    self.awake_time = now
+                    self.idling = False
+                    self.wandering = True
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
+                    self.awake_time = now
 
-        self.fsm.execute()
-        self.last_movement = now
+            self.fsm.execute()
+            self.last_movement = now
 
     def died(self):
         dropped = None
@@ -713,73 +712,80 @@ class DarkWitches(Monster):
 
         now = pygame.time.get_ticks()
 
-        if now - self.last_movement < self.MOVEMENT_THRESHOLD - self.DEX:
-            return
+        if now - self.last_movement > self.MOVEMENT_THRESHOLD - self.DEX:
 
-        self.HP += 5
-        if self.HP > self.total_max_hp():
-            self.HP = self.total_max_hp()
+            self.MP += 2
+            if self.MP > self.MAX_MP:
+                self.MP = self.MAX_MP
 
-        self.MP += 2
-        if self.MP > self.MAX_MP:
-            self.MP = self.MAX_MP
+            if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
+                # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
+                # self.path = self.path_finding.aStar()
+                self.path = self.path_finding.aStar(self.row, self.col, self.player.row, self.player.col)
+                self.current_step = 0
+                self.last_path_finding = now
 
-        if self.path == [] or now - self.last_path_finding > self.PATH_FINDING_INTERVAL:
-            # self.path_finding.setStartEnd(self.row, self.col, self.player.row, self.player.col)
-            # self.path = self.path_finding.aStar()
-            self.path = self.path_finding.aStar(self.row, self.col, self.player.row, self.player.col)
-            self.current_step = 0
-            self.last_path_finding = now
+            if self.idling:
 
-        if self.idling:
+                self.HP += 5
+                if self.HP > self.total_max_hp():
+                    self.HP = self.total_max_hp()
 
-            if (now - self.last_telescope > self.TELESCOPE_INTERVAL and self.telescope()) \
-                    or distance_to(self.row, self.col, self.player.row, self.player.col) < 15:
-                self.fsm.transition("IdleToApproach")
-                self.idling = False
-                self.seeking = True
-                self.attacking = False
-                self.fleeing = False
-                self.awake_time = now
+                if (now - self.last_telescope > self.TELESCOPE_INTERVAL and self.telescope()) \
+                        or distance_to(self.row, self.col, self.player.row, self.player.col) < 15:
+                    self.fsm.transition("IdleToApproach")
+                    self.idling = False
+                    self.seeking = True
+                    self.attacking = False
+                    self.fleeing = False
+                    self.awake_time = now
 
-        if self.seeking:
-            if len(self.path) < 10:
-                self.fsm.transition("ApproachToAttack")
-                self.idling = False
-                self.seeking = False
-                self.attacking = True
-                self.fleeing = False
-                self.awake_time = now
+            if self.seeking:
 
-            if now - self.awake_time > self.LARGEST_AWAKE_TIME:
-                self.fsm.transition("ApproachToIdle")
-                self.idling = True
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
+                self.HP += 5
+                if self.HP > self.total_max_hp():
+                    self.HP = self.total_max_hp()
 
-        if self.attacking:
-            if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
-                self.fsm.transition("AttackToFlee")
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = True
-                self.awake_time = now
+                if len(self.path) < 10:
+                    self.fsm.transition("ApproachToAttack")
+                    self.idling = False
+                    self.seeking = False
+                    self.attacking = True
+                    self.fleeing = False
+                    self.awake_time = now
 
-        if self.fleeing:
-            if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:      # consider revise
-                self.fsm.transition("FleeToIdle")
-                self.awake_time = now
-                self.idling = True
-                self.seeking = False
-                self.attacking = False
-                self.fleeing = False
-                self.awake_time = now
+                if now - self.awake_time > self.LARGEST_AWAKE_TIME:
+                    self.fsm.transition("ApproachToIdle")
+                    self.idling = True
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
 
-        self.fsm.execute()
-        self.last_movement = now
+            if self.attacking:
+                if self.HP < self.MAX_HP / 4 and randint(0, 3) == 0:
+                    self.fsm.transition("AttackToFlee")
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = True
+                    self.awake_time = now
 
+            if self.fleeing:
+                if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:  # consider revise
+                    self.fsm.transition("FleeToIdle")
+                    self.awake_time = now
+                    self.idling = True
+                    self.seeking = False
+                    self.attacking = False
+                    self.fleeing = False
+                    self.awake_time = now
+
+            self.fsm.execute()
+            self.last_movement = now
+        
     def telescope(self):
+        if self.MP < 5:
+            return False
+        self.MP -= 5
         row = randint(0, MAX_ROW)
         col = randint(0, MAX_COL)
         return row <= self.player.row <= row + 10 and col <= self.player.col <= col + 10

@@ -246,9 +246,9 @@ class Maze:
 
             #   right now only have goblins
 
-            if self.levels <= 2:
+            if self.levels < 2:
                 monster = actors.Goblin(self, row, col, randint(self.levels + 1, self.levels + 3), self.player)
-            elif self.levels <= 5:
+            else:
                 if randint(0, 1) == 1:
                     monster = actors.Goblin(self, row, col, randint(self.levels + 1, self.levels + 3), self.player)
                 else:

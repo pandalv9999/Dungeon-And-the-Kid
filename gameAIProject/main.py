@@ -349,7 +349,7 @@ def start_screen(screen):
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 630))
 
-        text = "Press 'i' to get Status. Press 'p' to pick up weapons."
+        text = "Press 'i' to get Status. Press 'p' to pick up objects."
         font = pygame.font.SysFont("times", 30)
         text = font.render(text, True, WHITE)
         screen.blit(text, (120, 660))
