@@ -40,8 +40,9 @@ def equip_or_use(player, num):
         elif isinstance(o, objects.Weapons):
             if not isinstance(player.shield, objects.TowerShield):
                 if isinstance(o, objects.HeavySword):
-                    player.inventory.append(player.shield)
-                    player.shield = None
+                    if player.shield is not None:
+                        player.inventory.append(player.shield)
+                        player.shield = None
                 temp = player.weapon
                 player.weapon = o
                 player.inventory.remove(o)
@@ -282,8 +283,39 @@ def death_screen(screen, player):
                 sys.exit()
 
         screen.fill(BLACK)
+
         image = get_image('gameover.jpg')
         screen.blit(image, (450, 280))
+
+        scroll = 0
+        currentScroll = None
+
+        for item in player.inventory:
+            if isinstance(item, objects.ScrollsOfResurrection):
+                scroll += 1
+                currentScroll = item
+
+        if scroll > 0:
+
+            text = "You have " + str(scroll) + " Scrolls of Resurrection."
+            font = pygame.font.SysFont("times", 30)
+            text = font.render(text, True, WHITE)
+            screen.blit(text, (410, 550))
+
+            text = "Press 'r' to resurrect. It will consume one Scroll of Resurrection."
+            font = pygame.font.SysFont("times", 30)
+            text = font.render(text, True, WHITE)
+            screen.blit(text, (410, 570))
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_r]:
+            if scroll > 0:
+                player.HP = player.total_max_hp() / 2
+                player.MP = player.MAX_MP / 2
+                player.maze.add_player_randomly(player)
+                player.inventory.remove(currentScroll)
+                PAUSE = False
+
         pygame.display.update()
 
 

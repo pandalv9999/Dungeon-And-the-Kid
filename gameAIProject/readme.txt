@@ -29,7 +29,7 @@ tips:
     1. Because the game's map, location of monster are all generated in random manner. So there will be situation that a lot of monster is surrounding the player. There is only grantee that the monster will not be born in the the start room of each level of maze.
     2. The dark witches, that are born in the map after the second level, will use "meteor" to attack character. That means, it can attack player within a certain distance, and the attack will not miss. They can attack the player even when there are walls between then.
     3. There are 'DEX' attribute of each character, including player. So the player will respond to the next command after few times once a command is make. So if you want to pick up objects on the map but actually you do not, press p to try again.
-
+    4. Tower Shield and Heavy Sword are extremely heavy. Although they increase your power a lot, they decrease your speed, and they need two hands to equip. Therefore, if you are equipping a heavy sword, your cannot equip shield anymore. If you are equipping tower shield, you cannot equip weapon anymore.
 
 
 	

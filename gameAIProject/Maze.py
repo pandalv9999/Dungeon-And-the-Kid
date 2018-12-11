@@ -232,7 +232,7 @@ class Maze:
 
         # tentative implementation. add a goblin.
 
-        num_monster = 5 + randint(self.levels, 5)
+        num_monster = 5 + randint(self.levels, self.levels + 5)
         for i in range(num_monster):
             start_room = self.room_list[0]
 
@@ -246,7 +246,9 @@ class Maze:
 
             #   right now only have goblins
 
-            if self.levels < 2:
+            if self.levels == 0:
+                monster = actors.Goblin(self, row, col, 1, self.player)
+            elif self.levels < 2:
                 monster = actors.Goblin(self, row, col, randint(self.levels + 1, self.levels + 3), self.player)
             else:
                 if randint(0, 1) == 1:
@@ -277,8 +279,8 @@ class Maze:
 
         self.player = None
         while True:
-            row = randint(0, self.MAX_ROW)
-            col = randint(0, self.MAX_COL)
+            row = randint(0, self.MAX_ROW - 1)
+            col = randint(0, self.MAX_COL - 1)
             if self.maze[row][col] == NULL:
                 break
 

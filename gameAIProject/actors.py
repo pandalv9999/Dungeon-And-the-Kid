@@ -276,6 +276,7 @@ class Player(Actors):
         self.INT = 10
         self.STR = 10
         self.weapon = objects.ShortSword(0, 0, self)
+        self.inventory.append(objects.ScrollsOfResurrection(0, 0, self))
         # self.weapon = objects.FireStaff(0, 0, self)
 
     def is_monster_ahead(self, direction):
@@ -622,7 +623,6 @@ class Goblin(Monster):
             if self.fleeing:
                 if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:  # consider revise
                     self.fsm.transition("FleeToWander")
-                    self.awake_time = now
                     self.idling = False
                     self.wandering = True
                     self.seeking = False
@@ -641,7 +641,7 @@ class Goblin(Monster):
         elif odd == 1:
             dropped = objects.MagicPointPotion(self.row, self.col)
 
-        if dropped is not None:
+        if dropped is not None and self.maze.maze[self.row][self.col] == 0:
             self.maze.object_list.append(dropped)
             self.maze.maze[self.row][self.col] = 8
         self.maze.monster_list.remove(self)
@@ -772,12 +772,10 @@ class DarkWitches(Monster):
             if self.fleeing:
                 if distance_to(self.row, self.col, self.player.row, self.player.col) > 20:  # consider revise
                     self.fsm.transition("FleeToIdle")
-                    self.awake_time = now
                     self.idling = True
                     self.seeking = False
                     self.attacking = False
                     self.fleeing = False
-                    self.awake_time = now
 
             self.fsm.execute()
             self.last_movement = now
@@ -857,7 +855,7 @@ class DarkWitches(Monster):
         elif odd == 1:
             dropped = objects.MagicPointPotion(self.row, self.col)
 
-        if dropped is not None:
+        if dropped is not None and self.maze.maze[self.row][self.col] == 0:
             self.maze.object_list.append(dropped)
             self.maze.maze[self.row][self.col] = 8
         self.maze.monster_list.remove(self)
